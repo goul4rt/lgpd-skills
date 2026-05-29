@@ -54,26 +54,33 @@ Nenhum desses tempos é cravado — depende do tamanho do projeto, da equipe dis
 
 ## 📦 Instalação
 
-### Opção 1: Por projeto (recomendado para times)
+### Opção 1: Plugin do Claude Code (recomendado)
+
+Sem cópia manual de arquivos, com versionamento e auto-update via Git:
+
+```
+/plugin marketplace add goul4rt/lgpd-skills
+/plugin install lgpd-skills@lgpd-skills
+```
+
+As 19 skills passam a ficar disponíveis automaticamente (namespace `lgpd-skills:`). Para atualizar, basta `/plugin marketplace update lgpd-skills`.
+
+### Opção 2: Manual por projeto (times que versionam as skills no repo)
 
 ```bash
-git clone https://github.com/goul4rt/lgpd-skills.git .claude/skills/lgpd-skills-temp
-mv .claude/skills/lgpd-skills-temp/lgpd-* .claude/skills/
-rm -rf .claude/skills/lgpd-skills-temp
+git clone https://github.com/goul4rt/lgpd-skills.git /tmp/lgpd-skills
+cp -r /tmp/lgpd-skills/plugins/lgpd-skills/skills/lgpd-* .claude/skills/
+rm -rf /tmp/lgpd-skills
 git add .claude/skills/lgpd-* && git commit -m "feat: add lgpd-skills"
 ```
 
-### Opção 2: Global (todos os seus projetos)
+### Opção 3: Manual global (todos os seus projetos)
 
 ```bash
-git clone https://github.com/goul4rt/lgpd-skills.git ~/.claude/skills/lgpd-skills-temp
-mv ~/.claude/skills/lgpd-skills-temp/lgpd-* ~/.claude/skills/
-rm -rf ~/.claude/skills/lgpd-skills-temp
+git clone https://github.com/goul4rt/lgpd-skills.git /tmp/lgpd-skills
+cp -r /tmp/lgpd-skills/plugins/lgpd-skills/skills/lgpd-* ~/.claude/skills/
+rm -rf /tmp/lgpd-skills
 ```
-
-### Opção 3: Via zip do release
-
-Baixe o último `lgpd-skills.zip` em [Releases](https://github.com/goul4rt/lgpd-skills/releases) e descompacte em `.claude/skills/` ou `~/.claude/skills/`.
 
 ## 🚀 Como usar
 
@@ -202,7 +209,7 @@ O Claude detecta automaticamente — você não precisa decorar nada. Exemplos q
 - **Resoluções CD/ANPD nº 30 e 31/2025** — Agendas regulatória e de fiscalização
 - **Lei nº 15.211/2025** (ECA Digital) — em vigor desde 17/03/2026
 
-Encode rígido das normas em [`lgpd-audit/references/normative-reference.md`](./lgpd-audit/references/normative-reference.md). As skills citam o artigo e a fonte sempre.
+Encode rígido das normas em [`plugins/lgpd-skills/skills/lgpd-audit/references/normative-reference.md`](./plugins/lgpd-skills/skills/lgpd-audit/references/normative-reference.md). As skills citam o artigo e a fonte sempre.
 
 ## 🛠️ Stack assumida
 

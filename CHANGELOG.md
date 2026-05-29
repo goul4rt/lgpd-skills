@@ -3,6 +3,17 @@
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2026-05-29
+
+### Adicionado
+- Suporte a instalação como **plugin do Claude Code** via marketplace:
+  `/plugin marketplace add goul4rt/lgpd-skills` + `/plugin install lgpd-skills@lgpd-skills`
+- Manifests `.claude-plugin/marketplace.json` e `.claude-plugin/plugin.json`
+
+### Alterado
+- Skills reorganizadas sob `skills/` (auto-descobertas pelo plugin)
+- README: instalação via plugin como opção recomendada; instalação manual mantida (`cp -r skills/lgpd-* ...`)
+
 ## [1.0.0] - 2026-05-28
 
 ### Adicionado
@@ -18,4 +29,5 @@ Versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - README bilíngue (PT-BR principal + visão geral em EN)
 - Licença MIT
 
+[1.1.0]: https://github.com/goul4rt/lgpd-skills/releases/tag/v1.1.0
 [1.0.0]: https://github.com/goul4rt/lgpd-skills/releases/tag/v1.0.0

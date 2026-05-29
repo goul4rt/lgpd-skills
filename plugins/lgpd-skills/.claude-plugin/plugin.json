@@ -1,0 +1,13 @@
+{
+  "name": "lgpd-skills",
+  "description": "Conjunto modular e orquestrado de skills para Claude que cobre, ponta-a-ponta, conformidade com a LGPD (Lei 13.709/2018), resoluções da ANPD aplicáveis e o ECA Digital (Lei 15.211/2025). Inclui 1 skill maestro (lgpd-audit) que orquestra 18 sub-skills especializadas: base legal, mapeamento de dados, ROPA, RIPD, consentimento, DSAR, resposta a incidentes, encarregado, criptografia, retenção, DPA, transferência internacional e proteção de menores.",
+  "version": "1.1.0",
+  "author": {
+    "name": "goul4rt",
+    "url": "https://github.com/goul4rt"
+  },
+  "homepage": "https://github.com/goul4rt/lgpd-skills",
+  "repository": "https://github.com/goul4rt/lgpd-skills",
+  "license": "MIT",
+  "keywords": ["lgpd", "privacy", "compliance", "brazil", "anpd", "data-protection", "eca-digital", "gdpr"]
+}
