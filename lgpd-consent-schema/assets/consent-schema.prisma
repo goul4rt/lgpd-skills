@@ -1,0 +1,114 @@
+// Consent ledger — append-only, versioned, evidência forte.
+// LGPD Art. 8 (consentimento), Art. 9 (informação), Art. 18, IX (revogação).
+
+enum LegalBasis {
+  CONSENT
+  CONTRACT
+  LEGAL_OBLIGATION
+  PUBLIC_POLICY
+  RESEARCH
+  REGULAR_RIGHTS
+  VITAL_PROTECTION
+  HEALTH_TUTELAGE
+  LEGITIMATE_INTEREST
+  CREDIT_PROTECTION
+}
+
+enum ConsentStatus {
+  GRANTED
+  REVOKED
+  EXPIRED
+  SUPERSEDED // substituído por nova versão
+}
+
+enum ConsentChannel {
+  WEB
+  MOBILE_RN
+  API
+  SIGNUP
+  SETTINGS_PAGE
+  EMAIL_OPTIN
+  COOKIE_BANNER
+}
+
+model PolicyVersion {
+  id          String   @id @default(cuid())
+  version     String   @unique // "v3.2"
+  effectiveAt DateTime
+  text        String   @db.Text
+  textHash    String   // SHA-256 do texto canônico
+  language    String   @default("pt-BR")
+  changelog   String?  @db.Text
+
+  consents    ConsentRecord[]
+
+  @@index([effectiveAt])
+}
+
+model ConsentRecord {
+  id              String        @id @default(cuid())
+
+  // Quem
+  subjectId       String        // FK lógica para User
+  // O quê
+  purpose         String        // "marketing_email", "personalization", "analytics", "biometric_auth"
+  policyVersionId String
+  policyVersion   PolicyVersion @relation(fields: [policyVersionId], references: [id])
+  legalBasis      LegalBasis    @default(CONSENT)
+
+  // Status
+  status          ConsentStatus
+  grantedAt       DateTime
+  revokedAt       DateTime?
+  expiresAt       DateTime?     // se houver TTL (raro, mas possível)
+
+  // Evidência (Art. 8º, § 2º — controlador tem ônus de prova)
+  evidenceHash    String        // SHA-256 do payload (IP+UA+timestamp+ui_snapshot)
+  ipAddress       String?       @db.Inet
+  userAgent       String?
+  locale          String        @default("pt-BR")
+  channel         ConsentChannel
+  uiSnapshot      String?       @db.Text // HTML/screenshot hash do que foi mostrado
+
+  // ECA Digital / Art. 14 LGPD
+  isMinor         Boolean       @default(false)
+  parentalConsent Boolean?
+  guardianRef     String?       // FK lógica para Guardian
+
+  // Propagação a operadores
+  propagatedTo    Json?         // ["datadog", "mixpanel"]
+
+  createdAt       DateTime      @default(now())
+
+  @@index([subjectId, purpose, status])
+  @@index([policyVersionId])
+  @@index([grantedAt])
+}
+
+// Para ECA Digital — vinculação a responsável legal até 16 anos
+model Guardian {
+  id             String   @id @default(cuid())
+  fullName       String
+  cpf            String   // criptografado em aplicação
+  email          String
+  phone          String?
+  relationship   String   // "mother", "father", "legal_guardian"
+  verifiedAt     DateTime?
+  verificationMethod String? // "id_doc", "video_call", "official_db"
+
+  minors         MinorLink[]
+
+  createdAt      DateTime @default(now())
+}
+
+model MinorLink {
+  id          String   @id @default(cuid())
+  minorUserId String
+  guardianId  String
+  guardian    Guardian @relation(fields: [guardianId], references: [id])
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  endedAt     DateTime?
+
+  @@unique([minorUserId, guardianId])
+}
