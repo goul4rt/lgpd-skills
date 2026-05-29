@@ -3,6 +3,15 @@
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.1.1] - 2026-05-29
+
+### Corrigido
+- Adicionados 3 assets referenciados mas ausentes (referências órfãs que quebravam a skill ao rodar):
+  - `lgpd-anonymization/assets/anonymization-recipes.md` (receitas SQL/Python)
+  - `lgpd-dpa/assets/dpa-template.md` (template das 12 cláusulas Art. 39)
+  - `lgpd-vendor-audit/assets/vendor-checklist.md` (checklist de due diligence)
+- `lgpd-audit`: `description` enxugada (1023 → 768 chars) para folga sob o limite de 1024 da spec de skills
+
 ## [1.1.0] - 2026-05-29
 
 ### Adicionado
@@ -29,5 +38,6 @@ Versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - README bilíngue (PT-BR principal + visão geral em EN)
 - Licença MIT
 
+[1.1.1]: https://github.com/goul4rt/lgpd-skills/releases/tag/v1.1.1
 [1.1.0]: https://github.com/goul4rt/lgpd-skills/releases/tag/v1.1.0
 [1.0.0]: https://github.com/goul4rt/lgpd-skills/releases/tag/v1.0.0
