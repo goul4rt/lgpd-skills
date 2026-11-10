@@ -1,85 +1,49 @@
 ---
 name: lgpd-ropa
-description: Generate and maintain the Registro de Operações de Tratamento de Dados Pessoais (ROPA) required by LGPD Art. 37. Use when user asks for "ROPA", "registro de operações", "registro de tratamento", or as part of the lgpd-audit pipeline. Consolidates input from `lgpd-data-mapping` and `lgpd-legal-basis` into the official ANPD template structure. Especially relevant when preparing for ANPD inspection or onboarding a new vendor that requests the ROPA.
+description: Generate and maintain the Registro de Operações de Tratamento de Dados Pessoais (ROPA) required by LGPD Art. 37, supporting both standard controllers/operators and the simplified ANPD model for ATPP (Resolução CD/ANPD nº 2/2022 Art. 9). Consolidates data mapping, legal bases, DPO/ATPP channel, vendors, transfers, security, and retention into `.lgpd/ROPA.md`.
 ---
 
-# ROPA — Registro de Operações de Tratamento
+# ROPA — Registro de Operações de Tratamento (Art. 37 LGPD)
 
-Art. 37 LGPD: "O controlador e o operador devem manter registro das operações de tratamento de dados pessoais que realizarem, **especialmente quando baseado no legítimo interesse**."
+Art. 37 da LGPD: *"O controlador e o operador devem manter registro das operações de tratamento de dados pessoais que realizarem, especialmente quando baseado no legítimo interesse."*
 
-## Pré-requisitos
+## Pré-requisitos (ordem de pipeline corrigida)
 
-- `.lgpd/data-map.md` preenchido (`lgpd-data-mapping`)
-- `.lgpd/legal-basis.md` preenchido (`lgpd-legal-basis`)
-- Encarregado designado (`lgpd-dpo-encarregado`)
+Execute **depois** de ter concluído:
+1. `.lgpd/data-map.md` (`lgpd-data-mapping`)
+2. `.lgpd/legal-basis.md` (`lgpd-legal-basis`)
+3. `.lgpd/encarregado.md` (`lgpd-dpo-encarregado` — contendo Encarregado formal **ou** registro de dispensa ATPP de baixo risco com canal obrigatório do Art. 11, § 1º da Res. 2/2022)
+4. `.lgpd/vendors/`, `.lgpd/transfers/` e `.lgpd/retention.md` (quando aplicáveis)
 
-Se faltar algum, execute a skill correspondente antes.
+## Modelos: Simplificado ATPP vs. Completo
 
-## Modelo base — ANPD para ATPP (8 campos)
-
-A ANPD publicou em 14/jun/2023 modelo simplificado para Agentes de Tratamento de Pequeno Porte. Use-o como **mínimo**; controladores maiores devem expandir.
-
-### Campos obrigatórios
-
-1. Informações de contato (controlador, operador, encarregado)
-2. Categorias de titulares
-3. Categorias de dados pessoais
-4. Compartilhamento de dados
-5. Medidas de segurança
-6. Período de armazenamento (retenção)
-7. Operação realizada (atividade + finalidade + hipótese legal)
-8. Observações
-
-### Campos adicionais (recomendados para controladores fora de ATPP)
-
-9. Avaliação de risco (link para RIPD se houver)
-10. Transferência internacional (link para `.lgpd/transfers/`)
-11. Fonte dos dados
-12. Decisão automatizada presente?
-13. Evidências de segurança (políticas, ISO, SOC2)
+- **ATPP (Res. CD/ANPD nº 2/2022, Art. 9º)**: pode elaborar e manter o registro de forma **simplificada**, seguindo o modelo orientativo publicado pela ANPD em junho de 2023 (8 blocos essenciais: contato, categorias de titulares, categorias de dados, compartilhamento, medidas de segurança, período de armazenamento, processo/finalidade/base legal e observações).
+- **Controladores/Operadores fora do regime simplificado (ou ATPP de alto risco)**: expandir com transferência internacional (adequação Res. 32/2026 ou SCCs Res. 19/2024), papel jurídico de cada terceiro, decisões automatizadas e vínculo com LIA/RIPD.
 
 ## Template — `.lgpd/ROPA.md`
 
-Ver `assets/ropa-template.md` para o template completo.
+Ver [`assets/ropa-template.md`](assets/ropa-template.md).
 
 ## Workflow
 
-1. Leia `data-map.md` e `legal-basis.md`.
-2. Para cada atividade no data map, gere uma linha no ROPA.
-3. Liste **separadamente** atividades como controlador vs. como operador.
-4. Inclua atividades baseadas em legítimo interesse com destaque.
+1. Consolide todas as atividades de `.lgpd/data-map.md` e `.lgpd/legal-basis.md`.
+2. Separe claramente **Seção I — Atividades em que atuamos como Controlador** e **Seção II — Atividades em que atuamos como Operador** (ex.: plataformas B2B SaaS processando dados de clientes corporativos).
+3. Destaque expressamente todas as operações fundamentadas em **legítimo interesse (Art. 7º, IX)** com referência ao respectivo LIA.
+4. Preencha os dados do Encarregado **ou**, no caso de ATPP de baixo risco dispensado (Res. 2/2022, Art. 11), registre expressamente a condição de ATPP e o **canal oficial de comunicação com titulares**.
 5. Salve em `.lgpd/ROPA.md`.
-6. **⏸ CHECKPOINT**: peça revisão do Encarregado / jurídico antes de considerar v1 final.
-7. Configure revisão semestral em calendário.
+6. **⏸ CHECKPOINT obrigatório**: pause para validação do Encarregado / responsável jurídico antes de marcar como versão publicada.
 
-## Quem precisa ter ROPA?
+## Governança contínua
 
-- **Todo controlador e todo operador** (Art. 37 — sem exceção formal).
-- ATPP pode usar formato simplificado da ANPD (Res. 2/2022).
-- Pessoa natural com tratamento não-econômico está fora do escopo da LGPD (Art. 4º, I).
-
-## Quem pode pedir o ROPA?
-
-- ANPD (em fiscalização)
-- Titulares (em DSAR — Art. 19 — eles têm direito a saber as finalidades e compartilhamentos)
-- Operadores (durante due diligence — pode pedir versão pública)
-- Auditores
-
-Manter versão pública (sem segredos comerciais/IP) é boa prática.
-
-## Versionamento
-
-- ROPA é **vivo**. Versione com Git.
-- Toda nova atividade, mudança de finalidade ou novo operador → nova versão do ROPA.
-- Header do arquivo deve ter: versão, data, changelog resumido.
+- Mantenha o ROPA versionado no Git: qualquer nova feature com dados pessoais, mudança de finalidade, novo operador ou nova transferência internacional exige atualização do ROPA.
+- A ANPD pode requisitar o ROPA em atividades de monitoramento/fiscalização (Art. 37 c/c Res. 4/2023).
 
 ## Status update
 
 ```markdown
-## F10 — ROPA ✓
-- ROPA v1.0 publicado em `.lgpd/ROPA.md`
-- {N} atividades como controlador
-- {M} atividades como operador
-- Revisão semestral agendada para {data}
-- Próximo: lgpd-dpo-encarregado
+## F12 / L11 — ROPA ✓
+- ROPA v{N} gerado em `.lgpd/ROPA.md` ({Simplificado ATPP | Completo})
+- {C} atividades como Controlador | {O} atividades como Operador
+- ⏸ Aguardando revisão do Encarregado/jurídico
+- Próximo passo: `lgpd-ripd` (se aplicável) ou `lgpd-privacy-policy`
 ```

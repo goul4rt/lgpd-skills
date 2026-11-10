@@ -1,152 +1,98 @@
-# RIPD — Relatório de Impacto à Proteção de Dados
+# RIPD — Relatório de Impacto à Proteção de Dados Pessoais
 
-**Atividade**: {nome}
-**Slug**: {ripd-slug}
-**Controlador**: {nome jurídico}
-**Encarregado**: {nome}
-**Equipe**: {nomes}
+**Atividade**: {A00X — nome}
+**Slug**: `{ripd-slug}`
+**Natureza da emissão**: `{Alto risco (teste cumulativo Res. 2/2022 Art. 4º) | Legítimo interesse (Art. 10, § 3º) | Preventivo (boa prática de gestão de risco)}`
+**Controlador**: {razão social e CNPJ}
+**Encarregado (ou canal ATPP)**: {nome e contato}
+**Equipe envolvida**: {engenharia, produto, segurança, jurídico}
 **Versão**: v{N} | **Data**: {data}
 
 ---
 
-## 1. Sumário executivo
+## 1. Sumário executivo e enquadramento de risco
 
-{2-3 parágrafos. O que o tratamento faz, por que precisa de RIPD, qual o resultado da avaliação.}
+{2–3 parágrafos resumindo a operação, o motivo da elaboração deste RIPD e a conclusão sobre o risco residual.}
 
-## 2. Contexto
+### Verificação do teste cumulativo (Res. CD/ANPD nº 2/2022, Art. 4º)
+- **Critérios gerais**:
+  - [ ] Larga escala multifatorial (titulares estimados, volume de atributos, duração/frequência e abrangência geográfica): `{análise concreta}`
+  - [ ] Potencial de afetar significativamente interesses e direitos fundamentais: `{análise concreta}`
+- **Critérios específicos**:
+  - [ ] Tecnologias emergentes ou inovadoras (ex.: IA/ML, biometria)
+  - [ ] Vigilância ou controle de zonas acessíveis ao público
+  - [ ] Decisões unicamente automatizadas / definição de perfis (*profiling*)
+  - [ ] Dados sensíveis ou dados de crianças, adolescentes ou idosos
 
-- Produto/feature:
-- Stakeholders:
-- Volume de titulares estimado:
-- Início previsto / atual:
-
-## 3. Descrição do tratamento
-
-### 3.1 Fluxo de dados
+## 2. Descrição do tratamento e ciclo de vida dos dados
 
 ```mermaid
 flowchart LR
-  T[Titular] -->|signup| API[API Next.js]
-  API --> DB[(Postgres)]
-  API --> Q[Fila]
-  Q --> Analytics[Datadog US]
-  DB --> Backup[S3 Backup criptografado]
+  T["Titular"] -->|"coleta"| API["Backend / App"]
+  API --> DB[("PostgreSQL")]
+  API --> Ext["Operadores / Provedores Externos"]
+  DB --> Ret["Bloqueio / Eliminação / Anonimização"]
 ```
 
-### 3.2 Sistemas envolvidos
-- Frontend: ...
-- Backend: ...
-- Banco: ...
-- Cache: ...
-- Filas/streams: ...
-- Observabilidade: ...
+- **Categorias de titulares**: `{adultos | adolescentes | crianças | idosos | colaboradores}`
+- **Atributos pessoais comuns e sensíveis**: `{listar}`
+- **Sistemas internos**: `{tabelas, filas, caches, buckets}`
+- **Agentes externos e seus papéis**: `{listar cada terceiro como Operador, Controlador Independente ou Conjunto + país}`
 
-### 3.3 Operadores
-- {Operador A} — `.lgpd/vendors/{a}.md`
-- {Operador B} — `.lgpd/vendors/{b}.md`
+## 3. Necessidade, proporcionalidade e princípios (Art. 6º LGPD)
 
-## 4. Necessidade e proporcionalidade
+- **Teste de necessidade**: a finalidade poderia ser atingida sem estes dados ou com dados anonimizados/sintéticos? `{justificar}`
+- **Alternativas menos intrusivas avaliadas e descartadas**: `{descrever}`
 
-- A finalidade pode ser atingida com menos dados? {análise}
-- Alternativas avaliadas: {lista}
-- Razão da escolha: {justificativa}
-
-## 5. Princípios LGPD (Art. 6)
-
-| Princípio | Como é atendido |
+| Princípio (Art. 6º) | Evidência técnica e organizacional |
 |---|---|
-| I — Finalidade | {específica e declarada na política} |
-| II — Adequação | {compatibilidade com expectativa do titular} |
-| III — Necessidade | {minimização — campos coletados} |
-| IV — Livre acesso | {DSAR endpoint, self-service} |
-| V — Qualidade | {validação, correção} |
-| VI — Transparência | {política, dashboard de privacidade} |
-| VII — Segurança | {medidas técnicas} |
-| VIII — Prevenção | {threat modeling, pentest} |
-| IX — Não discriminação | {avaliação de viés se houver IA} |
-| X — Responsabilização | {audit log, governança} |
+| I — Finalidade | `{finalidade determinada, explícita e informada}` |
+| II — Adequação | `{compatibilidade com o contexto informado ao titular}` |
+| III — Necessidade | `{campos mínimos + TTL definido}` |
+| IV — Livre acesso | `{consulta facilitada via /api/me e canal do Encarregado}` |
+| V — Qualidade dos dados | `{validação cadastral, retificação e controle contra alucinação/erro}` |
+| VI — Transparência | `{política em linguagem clara + informações sobre agentes e IA}` |
+| VII — Segurança | `{TLS, criptografia de storage/coluna, controle de acesso, KMS}` |
+| VIII — Prevenção | `{modelagem de ameaças LINDDUN, testes antes de produção}` |
+| IX — Não discriminação | `{auditoria de viés algorítmico e vedação de variáveis proibidas}` |
+| X — Responsabilização | `{logs de auditoria, LIA/RIPD versionados e governança}` |
 
-## 6. Base legal
+## 4. Base legal e direitos dos titulares (Arts. 7º, 11, 14, 18 e 20)
 
-- Art. {7º/11}, inciso {N}: {justificativa}
-- LIA (se Art. 7º, IX): `.lgpd/lia/{slug}.md`
+- **Base legal**: `{Art. 7º/11 + inciso}` — `{resumo da justificativa}`
+- **Melhor interesse (se envolver crianças/adolescentes — Art. 14 + Enunciado 1/2023)**: `{análise ou N/A}`
+- **Exercício de direitos**:
+  - Confirmação e acesso (`/api/me` e `/api/me/export`), correção (`/api/me/profile`), eliminação/bloqueio (`/api/me/erasure`), revogação de consentimento (`/api/consent/revoke`) e revisão/explicação de decisões automatizadas quando aplicável (Art. 20).
 
-## 7. Direitos do titular
+## 5. Modelagem de ameaças (LINDDUN + IA) e matriz de riscos
 
-| Direito (Art. 18) | Como é exercido |
-|---|---|
-| I — Confirmação de existência | endpoint `/api/me` |
-| II — Acesso | `/api/me/export` |
-| III — Correção | `/api/me/profile` |
-| IV — Anonimização/bloqueio/eliminação | `/api/me/erasure` |
-| V — Portabilidade | export em JSON estruturado |
-| VI — Eliminação consentida | `/api/me/erasure` |
-| VII — Compartilhamento | listado na política + ROPA |
-| VIII — Possibilidade de não consentir | banner com opt-in/opt-out |
-| IX — Revogação | `/api/me/consent/revoke` |
-
-## 8. Identificação e tratamento de riscos
-
-### 8.1 Matriz de riscos
-
-| ID | Risco | P (1-5) | I (1-5) | Nível | Mitigação | Status | Risco residual |
+| ID | Ameaça / Risco concreto | Categoria | P (1-5) | I (1-5) | Nível (P×I) | Controles mitigatórios | Risco residual |
 |---|---|---|---|---|---|---|---|
-| R001 | Vazamento via SDK Datadog | 2 | 4 | 8 | mascaramento PII pré-envio | mitigado | 2 |
-| R002 | Acesso indevido de funcionário | 2 | 5 | 10 | RBAC + audit log + treinamento | mitigado | 3 |
-| R003 | Re-identificação em export agregado | 3 | 3 | 9 | k-anonymity ≥ 5 | mitigado | 2 |
+| R01 | Vazamento de PII em logs/telemetria de terceiros | Disclosure | 3 | 4 | 12 | Redação de PII no logger + revisão de SDK | 3 (baixo) |
+| R02 | Inferência de atributo sensível ou re-identificação | Detecting / Linking | 2 | 4 | 8 | Pseudonimização HMAC + k-anonymity ≥ 5 | 2 (baixo) |
+| R03 | Viés discriminatório ou erro em modelo/automação (Art. 6º, IX / Art. 20) | IA / Profiling | 2 | 5 | 10 | Avaliação de métricas por subgrupo + canal de revisão e explicação | 4 (médio-baixo) |
+| R04 | Retenção/treinamento externo ou vazamento entre tenants em LLM/RAG | IA / Disclosure | 2 | 5 | 10 | Zero-data-retention contratual, filtro de PII no prompt e isolamento por tenant | 3 (baixo) |
 
-### 8.2 Riscos não mitigáveis
+## 6. Salvaguardas técnicas e administrativas verificadas
 
-{Se houver — explicar por que e qual a decisão.}
+- [ ] Criptografia em trânsito (TLS) e criptografia de armazenamento/volume gerenciada pela nuvem
+- [ ] Criptografia em nível de aplicação/coluna para atributos de alta criticidade (quando aplicável)
+- [ ] Controle de acesso por menor privilégio (RBAC) + MFA administrativo
+- [ ] Trilha de auditoria íntegra e monitorada
+- [ ] Contratos/DPAs (Art. 39) e mecanismo válido de transferência internacional (Res. 32/2026 ou Res. 19/2024)
+- [ ] Runbook de resposta a incidentes testado (Res. 15/2024)
 
-## 9. Salvaguardas técnicas
+## 7. Parecer do Encarregado e Decisão
 
-- [ ] TLS 1.3 em trânsito
-- [ ] TDE / criptografia em repouso
-- [ ] Pseudonimização de IDs em logs
-- [ ] RBAC + princípio do menor privilégio
-- [ ] MFA para acesso admin
-- [ ] Audit log imutável
-- [ ] Segregação de redes/contas
-- [ ] Backups criptografados + teste de restore
-- [ ] Pentest anual
-- [ ] Monitoramento de vazamento (DLP, threat intel)
+- **Parecer do Encarregado**: `{favorável | favorável com condicionantes | desfavorável}` — `{fundamentação}`
+- **Decisão do Controlador**:
+  - [ ] Prosseguir conforme especificado
+  - [ ] Prosseguir somente após implementar condicionantes: `{listar}`
+  - [ ] Suspender / redesenhar a atividade
 
-## 10. Salvaguardas administrativas
+**Assinaturas / Aprovação**:
+- Encarregado: `{nome}` — `{data}`
+- Responsável pelo produto/sistema: `{nome}` — `{data}`
 
-- [ ] Política de segurança da informação
-- [ ] Treinamento LGPD anual
-- [ ] NDA para funcionários e operadores
-- [ ] Processo de offboarding
-- [ ] Plano de resposta a incidente
-- [ ] DPA com todos os operadores
-
-## 11. Consulta a partes interessadas
-
-- Titulares: {pesquisa realizada / N participantes / data}
-- Encarregado: revisão em {data}
-- Jurídico: revisão em {data}
-- Segurança: revisão em {data}
-
-## 12. Decisão
-
-- [x] Prosseguir como planejado
-- [ ] Prosseguir com modificações
-- [ ] Não prosseguir
-- [ ] Consultar ANPD
-
-**Justificativa**: {texto}
-
-**Aprovado por**:
-- Encarregado: {nome} — {data}
-- Patrocinador do produto: {nome} — {data}
-
-## 13. Plano de revisão
-
-- Próxima revisão obrigatória: {data}
-- Gatilhos para revisão antecipada:
-  - Mudança de finalidade
-  - Nova categoria de dado
-  - Novo operador
-  - Incidente relacionado
-  - Crescimento > 50% na base de titulares
+## 8. Gatilhos de revisão obrigatória
+- Revisão periódica em `{data}` ou imediatamente diante de mudança de finalidade, inclusão de novas categorias sensíveis/menores, adoção de IA/decisão automatizada, troca de operador crítico ou incidente de segurança relacionado.

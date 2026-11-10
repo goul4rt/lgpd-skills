@@ -1,292 +1,232 @@
-# lgpd-skills
+# lgpd-skills — LGPD Privacy Engineering Toolkit
 
-> Conjunto modular e orquestrado de **Agent Skills** — funciona em **Claude Code, Codex, Gemini CLI, Cursor e OpenCode** — que cobre, ponta-a-ponta, conformidade com a **Lei nº 13.709/2018 (LGPD)**, resoluções da ANPD aplicáveis e a **Lei nº 15.211/2025 (ECA Digital)**.
+> **AI-assisted privacy auditing, implementation and governance for software projects.**
+> Toolkit modular e orquestrado de **Agent Skills** — compatível com **Claude Code, Codex, Gemini CLI, Cursor e OpenCode** — para diagnóstico técnico de código, implementação de controles de engenharia de privacidade e governança de artefatos sob a **Lei nº 13.709/2018 (LGPD)**, normas da **ANPD (até nov/2026)** e **Lei nº 15.211/2025 + Decreto nº 12.880/2026 (ECA Digital)**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![CI](https://github.com/goul4rt/lgpd-skills/actions/workflows/ci.yml/badge.svg)](./.github/workflows/ci.yml)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 [![LGPD](https://img.shields.io/badge/LGPD-Lei%2013.709%2F2018-blue)](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm)
 [![ECA Digital](https://img.shields.io/badge/ECA%20Digital-Lei%2015.211%2F2025-blue)](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15211.htm)
 
 ---
 
-> **EN — Quick overview:** An Agent Skills bundle (works in Claude Code, Codex, Gemini CLI, Cursor, and OpenCode) that runs an end-to-end Brazilian privacy-law compliance audit on your codebase. One orchestrator skill (`lgpd-audit`) chains 18 specialized sub-skills covering legal basis, data mapping, ROPA, DPIA (RIPD), consent ledger, DSAR endpoints, incident response (3 business days notification), encryption, retention, vendor DPAs, international transfer clauses, and ECA Digital (online safety for minors). Outputs versioned artifacts under `.lgpd/`. Triggered by phrases like *"audit our LGPD compliance"* or *"we had a data breach"*. MIT licensed.
+> **EN — Quick overview:** **LGPD Privacy Engineering Toolkit** — an Agent Skills bundle (works in Claude Code, Codex, Gemini CLI, Cursor, and OpenCode) for AI-assisted privacy auditing, technical control implementation, and living governance in software repositories. One orchestrator skill (`lgpd-audit`) coordinates 18 specialized sub-skills covering data mapping, legal basis (including Enunciado ANPD 1/2023), DPO/ATPP channels, ROPA, RIPD (with LINDDUN & AI threat modeling), event-sourced consent ledger, DSAR endpoints (standard vs. ATPP SLAs), emergency incident response (Res. 15/2024), field encryption, retention/erasure, vendor DPAs, international transfers (Res. 32/2026 EU/EEA adequacy & Res. 19/2024 SCCs), and ECA Digital (Lei 15.211/2025 + Decreto 12.880/2026). Includes automated normative/schema/code regression tests. MIT licensed.
 
 ---
 
 ## 📑 Índice
 
-- [O que é](#-o-que-é)
+- [O que é (e o que não é)](#-o-que-é-e-o-que-não-é)
 - [Quando usar](#-quando-usar)
 - [Instalação](#-instalação)
 - [Como usar](#-como-usar)
 - [As 19 skills](#-as-19-skills)
 - [Living artifacts em `.lgpd/`](#-living-artifacts-em-lgpd)
-- [Gatilhos](#-gatilhos)
-- [Cobertura normativa](#-cobertura-normativa)
-- [Stack assumida](#-stack-assumida)
-- [Disclaimer](#%EF%B8%8F-disclaimer)
+- [Cobertura normativa (revisão nov/2026)](#-cobertura-normativa-revisão-nov2026)
+- [Qualidade e testes automatizados](#-qualidade-e-testes-automatizados)
+- [Disclaimer jurídico](#%EF%B8%8F-disclaimer-jurídico)
 - [Contribuindo](#-contribuindo)
 - [Licença](#-licença)
 
 ---
 
-## 🎯 O que é
+## 🎯 O que é (e o que não é)
 
-Um pacote de **Agent Skills** — instalável em Claude Code, Codex, Gemini CLI, Cursor e OpenCode — que transforma uma conversa de "preciso adequar isso aqui à LGPD" em um pipeline executável, versionável e auditável.
+O `lgpd-skills` é um **Toolkit de Engenharia de Privacidade** composto por **19 Agent Skills coordenadas**:
+- **1 maestro** (`lgpd-audit`) que detecta emergências de segurança sem burocracia, gerencia dependências entre etapas, mantém estado em `.lgpd/` e pausa em checkpoints obrigatórios;
+- **18 sub-skills especializadas**, executáveis isoladamente ou em pipeline.
 
-Em vez de uma skill gigante e monolítica, aqui são **19 skills coordenadas**:
+### Escopo real: código vs. conformidade organizacional
 
-- **1 maestro** (`lgpd-audit`) que orquestra todo o fluxo, decide o pipeline, mantém estado e pausa em checkpoints críticos
-- **18 sub-skills** especializadas — cada uma roda sozinha, ou em sequência sob comando do maestro
+Nenhuma ferramenta que analisa apenas um repositório de código pode "certificar" ou garantir que uma organização está em conformidade jurídica plena. Este toolkit adota fronteiras transparentes:
 
-Cada sub-skill produz **artefatos vivos versionáveis em Git** sob `.lgpd/` (STATUS.md, ROPA.md, RIPD/, política, runbook de incidente, etc.) — combina com fluxo de ADR e spec-driven development.
+| O que o toolkit FAZ no repositório | O que EXIGE validação humana, jurídica e operacional externa |
+|---|---|
+| Inspeciona schemas, rotas, SDKs, cookies, permissões mobile e IaC para mapear fluxos reais de dados | Comprovar contratos/DPAs efetivamente assinados fora do Git e práticas reais de fornecedores |
+| Implementa código executável e testado (ledger de eventos de consentimento, rotas DSAR, criptografia de campos, *hash chain* serializada) | Auditar processos humanos internos, treinamento de equipes, atendimento informal e cultura operacional |
+| Estrutura rascunhos técnicos vivos em `.lgpd/` (ROPA, RIPD, LIA, runbook de incidente, minuta de política) | Validar escolhas de base legal, balanceamento de legítimo interesse, retenção setorial e textos públicos com o Encarregado e o jurídico |
+| Sinaliza configurações de risco e diferencia exigência legal expressa de boa prática de engenharia | Verificar IAM, segredos, backups e redes diretamente no ambiente de produção em nuvem |
+
+---
 
 ## 🧭 Quando usar
 
-| Cenário | Pipeline ativado | Tempo estimado |
+| Cenário | Pipeline | Comportamento inicial |
 |---|---|---|
-| Projeto greenfield, privacy-by-design desde o início | Pipeline A | 1-2 semanas |
-| Sistema legado em produção precisando de auditoria + retrofit | Pipeline B | 2-6 semanas |
-| Codebase híbrida (legado + features novas) | Pipeline C | 3-8 semanas |
-| Incidente de segurança em andamento — preciso comunicar a ANPD | Pipeline D | **3 dias úteis** (Res. 15/2024) |
+| **Incidente de segurança ativo ou suspeito** | **Pipeline D (Fast-Path)** | Aciona contenção, preservação de evidências e registro `T+0` **imediatamente**, sem aguardar discovery geral (3 dias úteis — Res. 15/2024) |
+| **Projeto greenfield** (*privacy-by-design*) | **Pipeline A** | Mapa preliminar → base legal → Encarregado/canal ATPP → fornecedores/transferências → controles técnicos → ROPA/RIPD/Política |
+| **Sistema legado em produção** | **Pipeline B** | Discovery reverso do código → matriz de gaps priorizada (P0/P1/P2) → retrofit incremental |
+| **Codebase híbrida** (legado + features novas) | **Pipeline C** | Diagnóstico do legado até fornecedores + controles completos nas novas features |
 
-Nenhum desses tempos é cravado — depende do tamanho do projeto, da equipe disponível, e do nível de maturidade atual.
+---
 
 ## 📦 Instalação
 
-As skills seguem o padrão aberto **Agent Skills** ([agentskills.io](https://agentskills.io))
-e funcionam nativamente em 5 agentes. Escolha o seu:
+Segue o padrão aberto **Agent Skills** ([agentskills.io](https://agentskills.io)) com suporte nativo a 5 agentes:
 
-### Claude Code (recomendado)
-
+### Claude Code
 ```text
 /plugin marketplace add goul4rt/lgpd-skills
 /plugin install lgpd-skills@lgpd-skills
 ```
 
-Atualizar: `/plugin marketplace update lgpd-skills`.
-
 ### Codex (CLI / App)
-
 ```bash
 codex plugin marketplace add goul4rt/lgpd-skills
 codex plugin add lgpd-skills@lgpd-skills
 ```
 
-Ou, dentro do `codex`, rode `/plugins` e instale pela vitrine. Não é preciso submeter
-nada ao marketplace da OpenAI — o repo é a própria fonte.
-
 ### Gemini CLI
-
 ```bash
 gemini extensions install https://github.com/goul4rt/lgpd-skills
 ```
 
-Atualizar: `gemini extensions update lgpd-skills`. As 19 skills são auto-descobertas e
-disparam via `activate_skill`.
-
 ### Cursor
-
-No editor, rode `/add-plugin` e cole a URL do repo
-(`https://github.com/goul4rt/lgpd-skills`), ou instale pela vitrine em
-[cursor.com/marketplace](https://cursor.com/marketplace).
+Rode `/add-plugin` no editor e informe `https://github.com/goul4rt/lgpd-skills`.
 
 ### OpenCode
-
-Adicione ao array `plugin` do seu `opencode.json` e reinicie:
-
+Adicione ao `opencode.json` (detalhes em [`.opencode/INSTALL.md`](./.opencode/INSTALL.md)):
 ```json
 {
   "plugin": ["lgpd-skills@git+https://github.com/goul4rt/lgpd-skills.git"]
 }
 ```
+> **Nota OpenCode:** ative explicitamente via ferramenta `skill` (ex.: *"use a skill lgpd-audit"*).
 
-Detalhes e ressalvas em [`.opencode/INSTALL.md`](./.opencode/INSTALL.md). **Atenção:** no
-OpenCode as skills não disparam sozinhas — ative com a ferramenta `skill` (ex.: "use a
-skill lgpd-audit").
-
-### Manual (qualquer agente que leia `~/.claude/skills/` ou `.claude/skills/`)
-
+### Instalação manual
 ```bash
 git clone https://github.com/goul4rt/lgpd-skills.git /tmp/lgpd-skills
-cp -r /tmp/lgpd-skills/skills/lgpd-* ~/.claude/skills/   # global
-# ou, por projeto: cp -r /tmp/lgpd-skills/skills/lgpd-* .claude/skills/
+cp -r /tmp/lgpd-skills/skills/lgpd-* ~/.claude/skills/
 rm -rf /tmp/lgpd-skills
 ```
 
+---
+
 ## 🚀 Como usar
 
-Após instalar, o agente detecta as skills automaticamente — não precisa configurar nada. (No OpenCode, as skills não disparam sozinhas: ative com a ferramenta `skill`, ex.: "use a skill lgpd-audit".)
-
-### Fluxo típico: auditoria completa
-
-```
-Você: veja como estamos de LGPD
+### Diagnóstico e governança estruturada
+```text
+Você: faça um diagnóstico de privacidade e LGPD deste projeto
 
 Agente: [ativa lgpd-audit]
-  → Antes de começar, qual cenário descreve melhor o projeto?
-    A) Greenfield  B) Legacy  C) Híbrido  D) Resposta a incidente
-
-Você: B
-
-Agente: [inicia Pipeline B — Legacy Retrofit]
-  → Vou começar pelo lgpd-legacy-retrofit para gap analysis...
-  → [lê código, schemas, package.json, env, ToS atual]
-  → [produz .lgpd/discovery.md + .lgpd/gaps.md]
-  → ⏸ CHECKPOINT — revise antes de seguir
-
-Você: (revisa) Continue.
-
-Agente: → lgpd-data-mapping...
-  → lgpd-legal-basis...
-  → (continua até a conclusão do pipeline)
+  → Pergunta cenário (A Greenfield / B Legacy / C Híbrido) e enquadramento ATPP (Res. 2/2022)
+  → [L1] lgpd-legacy-retrofit: inspeciona schemas, rotas, SDKs, cookies e produz .lgpd/discovery.md + .lgpd/gaps.md
+  → ⏸ CHECKPOINT — aguarda validação antes de avançar
+  → [L2] lgpd-data-mapping → [L3] lgpd-legal-basis → [L4] lgpd-dpo-encarregado → ... → ROPA / RIPD / Política
 ```
 
-### Uso individual
+### Incidente ativo (acionamento imediato)
+```text
+Você: descobrimos um endpoint expondo CPFs e e-mails de clientes agora
 
-Pode invocar qualquer skill diretamente:
-
+Agente: [ativa lgpd-audit → Fast-Path Pipeline D → lgpd-incident-response emergencial]
+  → Registra T+0, guia contenção e preservação forense imediata, avalia Art. 5º da Res. 15/2024
 ```
-Você: implementa o endpoint de exclusão de conta
-
-Agente: [ativa lgpd-dsar e gera código + schema + audit log]
-```
-
-```
-Você: tivemos um vazamento de e-mails, preciso comunicar a ANPD
-
-Agente: [ativa lgpd-incident-response em modo emergencial]
-  → Vou guiar pelo runbook da Res. 15/2024. T+0...
-```
-
-## 🗂️ As 19 skills
-
-```
-lgpd-audit (maestro)
-│
-├── lgpd-legal-basis           Base legal por atividade (Art. 7/11) + LIA
-├── lgpd-data-mapping          Inventário (reverse-eng em legado, schema annotations em greenfield)
-├── lgpd-ropa                  Registro de Operações (Art. 37) — modelo ANPD ATPP
-├── lgpd-ripd                  Relatório de Impacto (Art. 38) — metodologia ISO 31000
-├── lgpd-consent-schema        Prisma ledger append-only + Better Auth + Guardian/MinorLink
-├── lgpd-dsar                  Direitos do titular (Art. 18) — SLA 15 dias hard-coded
-├── lgpd-privacy-policy        Política Art. 9 — 7 elementos + versionamento + CHECKPOINT
-├── lgpd-incident-response     Res. 15/2024 — 3 dias úteis ANPD + titular, runbook + tabletop
-├── lgpd-dpo-encarregado       Designação Res. 18/2024 — divulgação + conflito de interesse
-├── lgpd-dpa                   12 cláusulas mínimas para contrato com operador
-├── lgpd-international-transfer Res. 19/2024 — Cláusulas-Padrão BR
-├── lgpd-vendor-audit          Due diligence em operadores + tiering por risco
-├── lgpd-audit-logging         Log imutável encadeado (hash chain) — accountability
-├── lgpd-encryption-keys       TLS, TDE, KMS, crypto-shredding, Argon2id
-├── lgpd-anonymization         k-anonymity, pseudonimização, vault de tokens
-├── lgpd-retention-erasure     Hierarquia retenção legal × eliminação (Art. 18, VI)
-├── lgpd-eca-digital-minors    Lei 15.211/2025 — verificação de idade, vinculação ao responsável
-└── lgpd-legacy-retrofit       Discovery + gap analysis + plano priorizado (entrada Pipeline B)
-```
-
-## 📂 Living artifacts em `.lgpd/`
-
-Tudo que as skills produzem fica versionado:
-
-```
-.lgpd/
-├── STATUS.md              ← estado da auditoria + próximos passos
-├── data-map.md            ← inventário de tratamentos
-├── legal-basis.md         ← base legal por atividade
-├── ROPA.md                ← registro consolidado (Art. 37)
-├── RIPD/                  ← relatórios de impacto (Art. 38)
-│   └── ripd-{slug}.md
-├── consent/               ← schema do ledger
-├── dsar/                  ← workflow + endpoints
-├── incidents/             ← runbook + log 5 anos (Art. 10 Res. 15/2024)
-│   └── log.md
-├── policies/              ← política versionada
-│   └── privacy-policy-v{N}.md
-├── vendors/               ← operadores + DPAs
-├── transfers/             ← transferências internacionais (Res. 19/2024)
-├── encarregado.md         ← designação + publicação
-├── eca-digital.md         ← se aplicável
-└── gaps.md                ← não-conformidades priorizadas
-```
-
-Versione em Git, revise em PR, audite em retrospectiva.
-
-## 🔑 Gatilhos
-
-O agente detecta automaticamente — você não precisa decorar nada. Exemplos que ativam:
-
-| Frase | Skill |
-|---|---|
-| "veja como estamos de LGPD" | `lgpd-audit` |
-| "nos deixe LGPD-seguros" | `lgpd-audit` |
-| "audite LGPD do projeto" | `lgpd-audit` |
-| "gap analysis LGPD" | `lgpd-legacy-retrofit` (via maestro) |
-| "tivemos um incidente" | `lgpd-incident-response` |
-| "precisamos comunicar a ANPD" | `lgpd-incident-response` |
-| "preciso de uma RIPD" | `lgpd-ripd` |
-| "consent ledger no Prisma" | `lgpd-consent-schema` |
-| "endpoint de exclusão de conta" | `lgpd-dsar` |
-| "política de privacidade" | `lgpd-privacy-policy` |
-| "DPA com a AWS" | `lgpd-dpa` |
-| "menores na plataforma" | `lgpd-eca-digital-minors` |
-
-## 📚 Cobertura normativa
-
-- **Lei nº 13.709/2018** (LGPD), com alterações da Lei nº 15.352/2026
-- **Resolução CD/ANPD nº 2/2022** — Agentes de Tratamento de Pequeno Porte (ATPP)
-- **Resolução CD/ANPD nº 4/2023** — Dosimetria de sanções
-- **Resolução CD/ANPD nº 15/2024** — Comunicação de Incidentes de Segurança (3 dias úteis)
-- **Resolução CD/ANPD nº 18/2024** — Encarregado pelo Tratamento
-- **Resolução CD/ANPD nº 19/2024** — Cláusulas-Padrão Contratuais para Transferência Internacional
-- **Resoluções CD/ANPD nº 30 e 31/2025** — Agendas regulatória e de fiscalização
-- **Lei nº 15.211/2025** (ECA Digital) — em vigor desde 17/03/2026
-
-Encode rígido das normas em [`skills/lgpd-audit/references/normative-reference.md`](./skills/lgpd-audit/references/normative-reference.md). As skills citam o artigo e a fonte sempre.
-
-## 🛠️ Stack assumida
-
-As skills assumem (sem exigir) uma stack moderna comum:
-
-- **Next.js 14+** com App Router
-- **Prisma + PostgreSQL**
-- **Better Auth** (autenticação)
-- **React Native + Expo** (mobile)
-- **AWS / GCP** (cloud)
-- **Datadog / Sentry** (observabilidade)
-- **Stripe / Pagar.me** (pagamento)
-
-Os exemplos de código vêm nessa stack, mas os princípios e templates funcionam em qualquer stack — só adapte a sintaxe.
-
-## ⚠️ Disclaimer
-
-**Este projeto não constitui aconselhamento jurídico.** As skills codificam boas práticas e o texto das normas conforme encode rígido na referência normativa, mas:
-
-- Decisões sobre comunicação à ANPD devem envolver o Encarregado e jurídico
-- Avaliação de fato de incidente notificável é caso a caso
-- Cláusulas contratuais negociadas devem ser revisadas por advogado
-- Resposta a fiscalização deve ser conduzida por especialista
-- Texto da política de privacidade deve passar por revisão jurídica antes de publicar
-
-**Consulte um(a) advogado(a) especializado em proteção de dados** para tomada de decisão jurídica concreta.
-
-As próprias skills lembram disso nos pontos críticos — quando você pedir "isso é legal?" ou "vamos ser multados?", a resposta inclui essa recomendação.
-
-## 🤝 Contribuindo
-
-Issues e PRs muito bem-vindos! Especialmente:
-
-- Correções de normas (ANPD publica resoluções com frequência)
-- Templates adicionais (LIA por setor, RIPD para casos específicos)
-- Stacks adicionais (Django, Rails, Spring Boot, Laravel)
-- Traduções
-
-Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para detalhes.
-
-## 📄 Licença
-
-[MIT](./LICENSE). Use à vontade, inclusive comercialmente. Atribuição é apreciada mas não obrigatória.
 
 ---
 
-Construído por [goul4rt](https://github.com/goul4rt).
-Feedback, dúvidas e sugestões: abra uma issue.
+## 🗂️ As 19 skills
+
+```text
+lgpd-audit (maestro — triagem imediata de incidente + pipelines A/B/C/D)
+│
+├── lgpd-data-mapping           Inventário de fluxos, schemas, cookies, SDKs, telemetria e papéis jurídicos
+├── lgpd-legal-basis            Base legal por atividade (Arts. 7º/11), LIA e Enunciado ANPD 1/2023 (menores)
+├── lgpd-dpo-encarregado        Designação Res. 18/2024 OU dispensa ATPP baixo risco + canal (Res. 2/2022 Art. 11)
+├── lgpd-ropa                   Registro de Operações (Art. 37) — modelo completo ou simplificado ATPP
+├── lgpd-ripd                   Relatório de Impacto (Art. 38) — teste cumulativo, LINDDUN e riscos de IA
+├── lgpd-consent-schema         Ledger Prisma orientado a eventos (GRANTED/REVOKED/SUPERSEDED/EXPIRED) + triggers SQL
+├── lgpd-dsar                   Direitos do titular (Arts. 18-20) — SLAs padrão vs. ATPP, representantes e canais
+├── lgpd-privacy-policy         Política Art. 9º consolidada a partir do ROPA + CHECKPOINT jurídico
+├── lgpd-incident-response      Res. 15/2024 — contenção T+0, 3d/6d úteis, 12 itens ANPD + registro de 5 anos
+├── lgpd-vendor-audit           Classificação Operador vs. Controlador Independente/Conjunto + tiering de risco
+├── lgpd-dpa                    Checklist contratual de 12 boas práticas (Art. 39 e Art. 42, § 1º, I)
+├── lgpd-international-transfer Adequação UE/EEE (Res. 32/2026) + Cláusulas-Padrão BR (Res. 19/2024 Anexo II)
+├── lgpd-audit-logging          Hash chain serializada (advisory lock + seq), triggers e âncora externa WORM
+├── lgpd-encryption-keys        TLS, storage encryption vs. TDE, AES-256-GCM versionado, blind index HMAC e KMS
+├── lgpd-anonymization          Pseudonimização com vault segregado, k-anonymity, l-diversity e testes de ataque
+├── lgpd-retention-erasure      Prazos legais com documento/marco inicial, tombstones de backup e outbox Art. 18 § 6º
+├── lgpd-eca-digital-minors     Lei 15.211/2025 + Dec. 12.880/2026 + Guia ANPD TI out/2026 (modulado por papel/risco)
+└── lgpd-legacy-retrofit        Discovery reverso de código + matriz priorizada (técnico vs. organizacional)
+```
+
+---
+
+## 📂 Living artifacts em `.lgpd/`
+
+Todos os artefatos produzidos ficam versionados no repositório do projeto auditado:
+
+```text
+.lgpd/
+├── STATUS.md              ← progresso, enquadramento ATPP/padrão e fronteiras da análise
+├── discovery.md           ← evidências técnicas levantadas no código
+├── data-map.md            ← atividades, cookies/SDKs e papel jurídico de cada terceiro
+├── legal-basis.md         ← bases legais + avaliação do melhor interesse (menores)
+├── lia/                   ← Legitimate Interest Assessments (Art. 7º, IX + Art. 10)
+├── encarregado.md         ← designação Res. 18/2024 ou canal obrigatório ATPP
+├── ROPA.md                ← registro consolidado (Art. 37)
+├── RIPD/                  ← relatórios de impacto (alto risco cumulativo ou preventivos)
+├── consent/               ← schema e especificação do ledger de eventos
+├── dsar/                  ← workflow operacional + rotas
+├── security/              ← criptografia, chaves, anonimização e trilha de auditoria
+├── retention.md           ← prazos legais, marcos iniciais, backups e propagação
+├── incidents/             ← runbook + registro interno obrigatório de 5 anos (Res. 15/2024 Art. 10)
+├── policies/              ← minutas e versões históricas da política de privacidade
+├── vendors/               ← fichas de due diligence e DPAs
+├── transfers/             ← avaliações de transferência internacional (Res. 32/2026 e Res. 19/2024)
+├── eca-digital.md         ← aderência modulada à Lei 15.211/2025 e Dec. 12.880/2026
+└── gaps.md                ← plano de remediação separando código e governança externa
+```
+
+---
+
+## 📚 Cobertura normativa (revisão nov/2026)
+
+Referência consolidada em [`skills/lgpd-audit/references/normative-reference.md`](./skills/lgpd-audit/references/normative-reference.md):
+
+- **Lei nº 13.709/2018 (LGPD)**, incluindo **Lei nº 15.352/2026** (ANPD como agência reguladora autônoma)
+- **Resolução CD/ANPD nº 2/2022** — Agentes de Tratamento de Pequeno Porte (teste cumulativo multifatorial de alto risco no Art. 4º, dispensa de Encarregado com canal obrigatório no Art. 11, declaração simplificada em 15 dias e prazos em dobro no Art. 14)
+- **Enunciado CD/ANPD nº 1/2023** — Aplicabilidade das bases dos Arts. 7º e 11 a crianças e adolescentes sob prevalência do melhor interesse
+- **Resolução CD/ANPD nº 4/2023** — Dosimetria e aplicação de sanções administrativas
+- **Resolução CD/ANPD nº 15/2024** — Comunicação de Incidentes de Segurança (3 dias úteis; registro interno por 5 anos no Art. 10)
+- **Resolução CD/ANPD nº 18/2024** — Regulamento do Encarregado pelo Tratamento de Dados Pessoais
+- **Resolução CD/ANPD nº 19/2024** — Transferência Internacional e Cláusulas-Padrão Contratuais brasileiras
+- **Resoluções CD/ANPD nº 30 e 31/2025** — Mapa de Temas Prioritários (2026–2027) e Agenda Regulatória (2025–2026)
+- **Resolução CD/ANPD nº 32/2026 (26/01/2026)** — Decisão de Adequação reconhecendo União Europeia e EEE (Islândia, Liechtenstein e Noruega)
+- **Deliberação CD/ANPD de setembro/2026 (Voto nº 11/2025/DIR-MW)** — Arquivamento da minuta isolada do Guia de Alto Risco para consolidação futura na regulamentação de RIPD
+- **Lei nº 15.211/2025 (ECA Digital)**, **Decreto nº 12.880/2026** e **Guia Orientativo da ANPD para Fornecedores de Produtos ou Serviços de TI (28/10/2026)**
+
+---
+
+## 🧪 Qualidade e testes automatizados
+
+O repositório conta com validação estática, checagem de tipos, validação de schemas Prisma, regressão normativa e testes de cenários executados via GitHub Actions:
+
+```bash
+npm install
+npm run check   # frontmatters + links/assets + manifests + regressão normativa + tsc + prisma validate + testes unitários
+```
+
+Cobertura automatizada:
+- Frontmatters YAML, limite de tamanho de `description` e integridade de links/assets das 19 skills;
+- Consistência de versões e carregamento dos manifests nos 5 agentes suportados;
+- Validação real de schemas Prisma (`prisma validate`) e extrator `extract-prisma-annotations.sh`;
+- Compilação estrita TypeScript (`tsc --noEmit --strict`) das implementações de referência;
+- Testes de cenários: linhagem e ordenação do *consent ledger*, concorrência paralela e detecção de adulteração na *hash chain*, rotação de chaves e *blind index* na criptografia Prisma, cálculo de SLAs DSAR (padrão vs. ATPP) e regras etárias de menores.
+
+---
+
+## ⚠️ Disclaimer jurídico
+
+**Este projeto é uma ferramenta de engenharia de privacidade e não constitui aconselhamento ou certificação jurídica.** Decisões sobre enquadramento de bases legais, comunicação de incidentes à ANPD, celebração de contratos/DPAs, avaliação de risco residual e publicação de políticas exigem validação pelo **Encarregado (DPO)** e por **advogado(a) especializado(a) em proteção de dados**.
+
+---
+
+## 🤝 Contribuindo
+
+Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para diretrizes de precisão normativa, padrões de código executável e processo de atualização regulatória.
+
+## 📄 Licença
+
+[MIT](./LICENSE) — construído por [goul4rt](https://github.com/goul4rt).

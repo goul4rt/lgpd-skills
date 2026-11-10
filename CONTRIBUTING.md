@@ -1,78 +1,60 @@
 # Contribuindo
 
-Obrigado pelo interesse! Este projeto vive de contribuições da comunidade brasileira de privacy engineering, segurança e direito digital.
+Obrigado pelo interesse! Este projeto vive de contribuições da comunidade brasileira de privacy engineering, segurança da informação e direito digital.
 
 ## Como contribuir
 
 ### 1. Reportando problemas
 
-Abra uma issue. Tipos especialmente bem-vindos:
+Abra uma issue usando os labels `bug`, `norma`, `template`, `enhancement` ou `documentation`:
 
-- **Imprecisão normativa** — citação errada, prazo desatualizado, resolução nova não coberta
-- **Bug em template** — schema Prisma com erro, fluxo de DSAR quebrado, etc.
-- **Gap de cobertura** — algum cenário comum que nenhuma skill resolve
-- **Sugestão de melhoria** — fluxo mais natural, gatilho que falha, redação confusa
+- **Imprecisão normativa** — citação desatualizada, nova resolução/enunciado/guia da ANPD, simplificação jurídica excessiva
+- **Bug em implementação** — schema Prisma inválido, condição de corrida, falha de tipos nos módulos TypeScript
+- **Gap de cobertura** — cenário relevante para projetos modernos de software ainda não coberto
 
-Use os labels: `bug`, `norma`, `template`, `enhancement`, `documentation`.
+### 2. Pull requests e verificações obrigatórias
 
-### 2. Pull requests
+Antes de abrir um PR, execute localmente toda a suíte de validação:
 
-Para mudanças pequenas (typo, link quebrado, ajuste de redação): PR direto.
-
-Para mudanças maiores (nova skill, mudança em arquitetura, refactor): abra uma issue primeiro para discussão.
-
-#### Padrão de commit
-
-Convencional commits:
-
-```
-feat(consent-schema): add LGPD Art. 14 parental consent fields
-fix(dsar): correct 15-day SLA calculation for ATPP
-docs(readme): clarify Pipeline B duration
-chore(license): add MIT
+```bash
+npm install
+npm run check
 ```
 
-#### Quando alterar uma skill
+O comando `npm run check` executa:
+1. **Validação estrutural e multi-agente** (`skills-validation.test.ts`): frontmatters YAML, limite de 1024 caracteres em `description`, integridade de todos os links/assets e sincronia de versão nos 5 agentes;
+2. **Suíte de regressão normativa** (`normative-regression.test.ts`): impede reintrodução de thresholds inventados ou referências revogadas/arquivadas;
+3. **Checagem estrita de tipos** (`tsc --noEmit`);
+4. **Validação de schemas Prisma** (`prisma validate`);
+5. **Testes unitários e de concorrência** (`node --test`).
 
-- Atualize o `description` no frontmatter se mudou o gatilho
-- Mantenha PT-BR no corpo, EN no frontmatter
-- Cite o artigo da lei ou resolução em toda recomendação nova
-- Atualize o `references/normative-reference.md` se trouxer norma nova
-- Teste com pelo menos um cenário real (use `.lgpd/` em um projeto seu)
+#### Padrão de commit (Conventional Commits)
 
-#### Quando adicionar uma skill nova
+```text
+fix(normative): update international transfer with Res. CD/ANPD 32/2026
+feat(consent-schema): refactor ledger to immutable ConsentEvent model
+test(audit-logging): add concurrent hash-chain serialization test
+```
 
-- Crie `lgpd-{slug}/SKILL.md` seguindo o padrão das existentes
-- Adicione assets em `lgpd-{slug}/assets/`
-- Inclua a skill na tabela de roteamento em `lgpd-audit/references/skill-routing.md`
-- Inclua no pipeline apropriado em `lgpd-audit/SKILL.md` se for parte do fluxo automático
-- Atualize o README
+#### Quando alterar ou criar uma skill
 
-## Diretrizes de conteúdo
+- Mantenha EN no frontmatter (`description <= 1024` caracteres) e PT-BR no corpo
+- Cite sempre o dispositivo normativo exato e **separe obrigação legal expressa de boa prática/referência de engenharia**
+- Atualize `skills/lgpd-audit/references/normative-reference.md` sempre que incorporar ato normativo novo
+- Todo exemplo de código ou schema deve estar respaldado por arquivo executável/validado pela suíte de testes
 
-### Sobre interpretação normativa
+## Governança de atualização normativa
 
-- **Fonte oficial sempre** — link para Planalto, ANPD, ou texto consolidado quando possível
-- **Sem opinião sobre casos concretos** — skills dão informação e estrutura, não conselho jurídico
-- **Distinção entre lei e prática** — quando a norma admite mais de uma leitura, deixar claro
-- **Disclaimer ao final** — recomendação de consulta a advogado é obrigatória em pontos sensíveis
+A regulamentação da ANPD e do ECA Digital evolui continuamente. Mantemos revisão periódica da referência normativa contra publicações oficiais (DOU e portal gov.br/anpd):
+- **Novas Resoluções ou Enunciados CD/ANPD**: revisão prioritária (P0) de `normative-reference.md` + testes de regressão;
+- **Guias Orientativos e Tomadas de Subsídios**: identificar claramente o caráter orientativo (*soft law*) ou preliminar, sem converter minutas não aprovadas em obrigações legais automáticas.
 
-### Sobre código
+## Diretrizes de conteúdo e tom
 
-- Stack base assumida: Next.js + Prisma + PostgreSQL + Better Auth + React Native (Expo)
-- Para outras stacks, adicione exemplo em `assets/{stack}/` mantendo o template principal
-- Código deve ser **executável**, não pseudocódigo — alguém deve conseguir copiar e adaptar
-
-### Sobre tom
-
-- PT-BR claro, sem juridiquês quando der pra evitar
-- Linguagem técnica precisa, mas acessível pra eng não-especialista em privacidade
-- Sem alarmismo nem minimização — riscos reais ditos em peso real
-
-## Code of conduct
-
-Seja respeitoso. Discordâncias técnicas e normativas são bem-vindas; ataques pessoais não.
+- **Fonte oficial sempre** — Planalto e portal da ANPD
+- **Fronteira clara** — documente o que pode ser verificado no código vs. o que depende de validação jurídica/organizacional externa
+- **Código real e testado** — nada de pseudocódigo que não compila ou omite campos obrigatórios do ORM
 
 ## Licença das contribuições
 
-Ao contribuir, você concorda em licenciar sua contribuição sob a mesma [MIT](./LICENSE) do projeto.
+Ao contribuir, você concorda em licenciar sua contribuição sob a mesma licença [MIT](./LICENSE) do projeto.

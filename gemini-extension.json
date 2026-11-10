@@ -1,5 +1,5 @@
 {
   "name": "lgpd-skills",
-  "version": "1.2.0",
-  "description": "Conjunto modular e orquestrado de skills de conformidade LGPD (Lei 13.709/2018), resoluções da ANPD e ECA Digital (Lei 15.211/2025). 1 maestro (lgpd-audit) + 18 sub-skills."
+  "version": "1.3.0",
+  "description": "LGPD Privacy Engineering Toolkit — auditoria de código assistida por IA, implementação de controles e governança para LGPD (Lei 13.709/2018), normas da ANPD e ECA Digital (Lei 15.211/2025). 1 maestro + 18 sub-skills."
 }

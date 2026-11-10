@@ -1,27 +1,47 @@
 ---
 name: lgpd-consent-schema
-description: Design the database schema for a versioned, append-only consent ledger that satisfies LGPD Art. 8 (free, informed, unambiguous consent for a specific purpose) and Art. 9 (information rights). Use when user asks for "consent schema", "consent ledger", "schema de consentimento", "Prisma consentimento", "consent management", or is integrating consent capture with Better Auth, NextAuth, Clerk, or any auth library. Outputs a Prisma schema + integration spec. Also produces the structure needed to support DSAR revocation (Art. 18, IX).
+description: Design an event-sourced, database-enforced append-only consent ledger satisfying LGPD Art. 8 (free, informed, unambiguous consent, burden of proof, easy revocation, policy version supersession), Art. 14, and Art. 18, IX. Use when user asks for "consent schema", "consent ledger", "schema de consentimento", "Prisma consentimento", or integrates consent capture/revocation with Better Auth, NextAuth, or Clerk. Outputs Prisma schema, PostgreSQL append-only triggers, and TypeScript helpers.
 ---
 
-# Consent Schema (Prisma + Better Auth)
+# Consent Ledger Orientado a Eventos (Prisma + PostgreSQL)
 
-Implementação técnica do consentimento como base legal (Art. 7º, I e Art. 11, I), versionado, auditável e revogável.
+Implementação técnica de consentimento quando a base legal da atividade é o **consentimento** (`Art. 7º, I` ou `Art. 11, I`, e `Art. 14, § 1º` para crianças).
 
-## Princípios
+> **Quando usar:** apenas para finalidades efetivamente baseadas em consentimento (ex.: comunicações de marketing sem legítimo interesse aplicável, cookies/trackers não essenciais, opt-in biométrico facultativo). **Não crie registros de "consentimento" para atividades cuja base real é execução de contrato (`Art. 7º, V`) ou obrigação legal (`Art. 7º, II`).**
 
-1. **Append-only** — nunca update destrutivo. Revogar = inserir novo registro com `status=REVOKED`.
-2. **Versionado pela política** — todo consentimento aponta para uma versão específica do texto consentido.
-3. **Específico por finalidade** — uma entrada por (titular, finalidade, versão da política).
-4. **Evidência forte** — hash do payload (timestamp, IP, user-agent, UI snapshot).
-5. **Revogação fácil** — Art. 8º, § 5º: "O consentimento pode ser revogado a qualquer momento mediante manifestação expressa do titular, por procedimento gratuito e facilitado."
+## Arquitetura: sequência de eventos imutáveis
 
-## Schema Prisma de referência
+Em vez de mutar uma linha ou misturar `grantedAt`/`revokedAt` no mesmo campo de ordenação, modele o consentimento como uma **sequência cronológica de eventos (`ConsentEvent`)**:
 
-Ver `assets/consent-schema.prisma`.
+- `GRANTED` — consentimento concedido para `(subjectId, purpose, policyVersionId)` com hash de evidência;
+- `REVOKED` — consentimento revogado pelo titular/responsável (`Art. 8º, § 5º`), referenciando o evento original via `rootConsentId`;
+- `SUPERSEDED` — substituído quando uma mudança material de finalidade/política invalida o consentimento anterior (`Art. 8º, § 6º`);
+- `EXPIRED` — expirado quando a concessão possuía TTL explícito (`expiresAt`).
 
-## Integração com Better Auth
+Cada evento possui:
+- `occurredAt: DateTime` + `seq: BigInt @default(autoincrement())` — **ordenação monotônica determinística** (`orderBy: [{ occurredAt: "desc" }, { seq: "desc" }]`), evitando que uma revogação no mesmo milissegundo de um grant mantenha o consentimento ativo por erro de ordenação;
+- `rootConsentId` — linhagem direta até o `GRANTED` original;
+- `policyVersionId` + `evidenceHash` + `channel` — preenchidos em **todos** os eventos (sem omissão de campos obrigatórios do Prisma).
 
-Better Auth permite adicionar campos custom e hooks `beforeCreate`. Use para:
+## Artefatos de referência prontos e testados
+
+- **Schema Prisma**: [`assets/consent-schema.prisma`](assets/consent-schema.prisma)
+- **Trigger PostgreSQL append-only real**: [`assets/consent-append-only.sql`](assets/consent-append-only.sql) — bloqueia `UPDATE`, `DELETE` e `TRUNCATE` diretamente no banco (além de `REVOKE UPDATE, DELETE` na role da aplicação).
+- **Módulo TypeScript tipado**: [`assets/consent-ledger.ts`](assets/consent-ledger.ts) (`grantConsent`, `revokeConsent`, `recordPolicySupersession`, `hasActiveConsent`).
+
+## Proteção append-only efetiva no banco
+
+Comentário em código não garante imutabilidade. Inclua na migration do Prisma o trigger de [`assets/consent-append-only.sql`](assets/consent-append-only.sql):
+
+```sql
+CREATE TRIGGER trg_consent_event_no_update_delete
+BEFORE UPDATE OR DELETE ON "ConsentEvent"
+FOR EACH ROW EXECUTE FUNCTION prevent_consent_event_mutation();
+```
+
+## Integração com Better Auth (sem coleta excessiva)
+
+Não obrigue `dateOfBirth` para todos os usuários em aplicações B2B/adultas sem necessidade (Art. 6º, III — minimização). Em produtos sujeitos ao ECA Digital (`lgpd-eca-digital-minors`), prefira sinais de idade de SO/loja (Decreto nº 12.880/2026) ou faixa etária verificada:
 
 ```ts
 // auth.ts
@@ -29,113 +49,72 @@ export const auth = betterAuth({
   database: prismaAdapter(db, { provider: "postgresql" }),
   user: {
     additionalFields: {
-      dateOfBirth: { type: "date", required: true }, // ECA Digital
-      parentalConsentRef: { type: "string", required: false },
-    }
+      ageBandVerified: { type: "string", required: false }, // ex.: "18+" | "16-17" | "12-15" | "<12"
+    },
   },
-  hooks: {
-    user: {
-      create: {
-        before: async (user, ctx) => {
-          // 1. Validar idade (ECA Digital se aplicável)
-          // 2. Não criar registro de consentimento aqui — fazer em /api/consent/grant
-          //    porque consentimento exige UX dedicada (não pode ser "enterrado" no signup)
-          return user;
-        }
-      }
-    }
-  }
+});
+// Capture consentimentos opcionais em UX dedicada e desacoplada (/api/consent/grant),
+// nunca embutidos como aceitação forçada nos Termos de Uso (Art. 8º, § 4º e Art. 9º, § 2º).
+```
+
+## Concessão, Revogação e Consulta de Estado Atual
+
+Use os helpers de [`assets/consent-ledger.ts`](assets/consent-ledger.ts):
+
+```ts
+import { grantConsent, revokeConsent, hasActiveConsent } from "@/lib/privacy/consent-ledger";
+
+// 1. Conceder consentimento específico
+await grantConsent(prisma, {
+  subjectId: session.user.id,
+  purpose: "marketing_email",
+  policyVersionId: currentPolicy.id,
+  evidence: {
+    forwardedFor: req.headers.get("x-forwarded-for"),
+    userAgent: req.headers.get("user-agent"),
+    locale: "pt-BR",
+    channel: "SETTINGS_PAGE",
+    uiSnapshot: "sha256:banner_v3_2_ptbr",
+  },
+});
+
+// 2. Revogar (Art. 8º, § 5º) — preenche todos os campos obrigatórios + rootConsentId
+const result = await revokeConsent(prisma, {
+  subjectId: session.user.id,
+  purpose: "marketing_email",
+  evidence: {
+    forwardedFor: req.headers.get("x-forwarded-for"),
+    userAgent: req.headers.get("user-agent"),
+    channel: "SETTINGS_PAGE",
+  },
+  propagatedTo: ["customer_io"],
+});
+
+if (result.revoked) {
+  await propagateRevocationToOperators(session.user.id, "marketing_email");
+}
+
+// 3. Consultar estado vigente antes de executar a finalidade
+const allowed = await hasActiveConsent(prisma, {
+  subjectId: session.user.id,
+  purpose: "marketing_email",
+  requiredPolicyVersionId: currentPolicy.requiresReconsent ? currentPolicy.id : undefined,
 });
 ```
 
-## Captura de consentimento na UI
+## Requisitos de UX (Art. 8º e Art. 9º)
 
-Princípios:
-- **Não pré-marcar** caixas (Art. 8º, § 4º — manifestação livre).
-- **Granular por finalidade** — uma caixa por finalidade, não "concordo com tudo".
-- **Linguagem clara** — leiga, sem juridiquês.
-- **Link para política** — versão exata do texto consentido.
-- **Idade** — se < 18, fluxo ECA Digital (ver `lgpd-eca-digital-minors`).
-
-Exemplo de payload do endpoint `/api/consent/grant`:
-
-```json
-{
-  "userId": "usr_abc123",
-  "policyVersionId": "policy_v3.2",
-  "purposes": [
-    { "purpose": "marketing_email", "granted": true },
-    { "purpose": "personalization", "granted": false },
-    { "purpose": "analytics", "granted": true }
-  ],
-  "evidence": {
-    "ip": "192.0.2.1",
-    "userAgent": "...",
-    "locale": "pt-BR",
-    "channel": "web",
-    "uiSnapshotHash": "sha256:..."
-  }
-}
-```
-
-## Revogação
-
-Endpoint `/api/consent/revoke`:
-
-```ts
-async function revokeConsent(userId: string, purpose: string) {
-  // 1. Cria registro com status=REVOKED, revokedAt=now
-  await prisma.consentRecord.create({
-    data: {
-      subjectId: userId,
-      purpose,
-      status: "REVOKED",
-      revokedAt: new Date(),
-      // ... mesma policyVersionId do consentimento ativo
-    }
-  });
-
-  // 2. Propaga para operadores (Datadog, Mixpanel, etc.)
-  await propagateRevocation(userId, purpose);
-
-  // 3. Bloqueia tratamentos futuros
-  await blockFuturePurpose(userId, purpose);
-}
-```
-
-## Helper de query
-
-```ts
-// Verificar se titular consentiu uma finalidade específica
-export async function hasActiveConsent(
-  subjectId: string,
-  purpose: string
-): Promise<boolean> {
-  const latest = await prisma.consentRecord.findFirst({
-    where: { subjectId, purpose },
-    orderBy: { grantedAt: "desc" }
-  });
-  return latest?.status === "GRANTED";
-}
-```
-
-**Sempre use este helper antes de tratar dados em finalidade baseada em consentimento.**
-
-## Versionamento de política
-
-Toda mudança material no texto da política de privacidade = nova `PolicyVersion`. Consentimentos antigos **não migram automaticamente** — você precisa re-coletar para a nova versão se a mudança afetar finalidades existentes (Art. 8º, § 6º).
-
-## Audit log
-
-Cada operação (grant, revoke, propagate) deve gerar entrada em `AuditLogEntry` (skill `lgpd-audit-logging`).
+- **Zero checkboxes pré-marcados** — manifestação deve ser livre e inequívoca.
+- **Granularidade por finalidade** — uma escolha independente para cada finalidade distinta.
+- **Assimetria zero na revogação** — revogar deve ser gratuito e tão simples quanto conceder (`Art. 8º, § 5º`).
+- **Mudança material de finalidade (`Art. 8º, § 6º`)** — emitir nova `PolicyVersion` com `requiresReconsent = true` e registrar `SUPERSEDED` até nova coleta.
 
 ## Status update
 
 ```markdown
-## F3 — Consent schema ✓
-- Schema implementado em `prisma/schema.prisma`
-- Endpoints: POST /api/consent/grant, POST /api/consent/revoke, GET /api/consent
-- Better Auth hooks configurados
-- Propagação para operadores: {lista}
-- Próximo: lgpd-privacy-policy
+## F5 / L7a — Consent ledger ✓
+- Modelo `ConsentEvent` + `PolicyVersion` validado em `prisma/schema.prisma`
+- Trigger PostgreSQL append-only aplicada em migration
+- Helpers `grantConsent`, `revokeConsent` e `hasActiveConsent` testados
+- Propagação de revogação configurada para operadores: {lista}
 ```

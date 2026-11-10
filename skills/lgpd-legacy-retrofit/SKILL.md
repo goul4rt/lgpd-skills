@@ -1,122 +1,60 @@
 ---
 name: lgpd-legacy-retrofit
-description: Run a gap analysis and retrofit plan for an existing system that wasn't built with LGPD in mind. Use when user asks 'auditar projeto legado LGPD', 'gap analysis LGPD', 'sistema antigo LGPD', 'temos LGPD?', 'estamos em compliance?', or when invoking lgpd-audit on a legacy codebase. Produces prioritized remediation plan in `.lgpd/gaps.md`. Entry point for Pipeline B.
+description: Run a code-level privacy discovery, gap analysis, and prioritized retrofit plan for an existing software project. Entry point for Pipeline B when user asks 'auditar projeto legado LGPD', 'gap analysis LGPD', 'sistema antigo LGPD', 'diagnóstico de privacidade no código', or invokes `lgpd-audit` on an existing repository. Produces `.lgpd/discovery.md` and `.lgpd/gaps.md`.
 ---
 
-# Legacy Retrofit — LGPD Gap Analysis
+# Legacy Retrofit — Diagnóstico e Plano de Remediação
 
-Skill de entrada para auditar e remediar sistemas legados. Não tenta resolver tudo de uma vez — produz **plano priorizado**.
+Skill de entrada para sistemas já em produção (`Pipeline B — L1`). Produz diagnóstico técnico objetivo do repositório e separa claramente **o que foi verificado no código** do que **depende de validação jurídica/organizacional externa**.
 
-## Workflow (em uma sessão)
+## Workflow
 
-### Fase 1: Discovery (1-2h)
+### Fase 1: Discovery reverso do repositório
+Inspecione sistematicamente:
+1. **Modelos de dados e migrations** (`prisma/schema.prisma`, SQL, ORM models)
+2. **Rotas, controllers, Server Actions e jobs assíncronos**
+3. **Dependências, SDKs mobile/web e variáveis de ambiente** (`package.json`, `app.json`, `Info.plist`, `AndroidManifest.xml`, `.env.example`)
+4. **Cookies, trackers, pixels e logs de aplicação/APM** (verificar vazamento de PII em `console.log`, Sentry, Datadog)
+5. **Fluxos de autenticação, consentimento e exclusão de conta existentes**
+6. **Infraestrutura como código (IaC)** — regiões de nuvem, criptografia de volumes/buckets, retenção de backups
+7. **Textos públicos versionados** — Política de Privacidade, Termos de Uso, contato do Encarregado
 
-Investigue o código existente:
+Registre os fatos observados (com links para arquivos e linhas) em `.lgpd/discovery.md`.
 
-1. **Schema do banco** — `prisma/schema.prisma`, migrations
-2. **APIs** — rotas, controllers, GraphQL schemas
-3. **SDKs de terceiros** — `package.json`, env vars
-4. **Endpoints expostos** — OpenAPI, docs
-5. **Cookies e tracking** — frontend code, GTM, pixels
-6. **Mobile** — permissions no AndroidManifest/Info.plist
-7. **Política de privacidade existente** — site, app, ToS
-8. **Encarregado existente** — sítio público
-9. **Incidentes anteriores** — registros, post-mortems
-10. **Operadores ativos** — billing, integrações
+### Fase 2: Matriz de Gap Analysis
 
-Salve resultados em `.lgpd/discovery.md`.
+Classifique cada dimensão como `OK (no código)`, `PARCIAL`, `GAP` ou `VALIDAÇÃO EXTERNA NECESSÁRIA`:
 
-### Fase 2: Gap analysis sistemático
-
-Para cada item, marque GREEN/YELLOW/RED:
-
-| Item | Status | Evidência | Severidade |
+| Dimensão | Status | Evidência observada | Tipo de pendência |
 |---|---|---|---|
-| Base legal documentada por atividade | RED | nenhuma | crítica |
-| ROPA existe | RED | nenhum | crítica |
-| Política de privacidade publicada | YELLOW | existe v desatualizada | alta |
-| Encarregado designado | YELLOW | em DPA, sem div. pública | alta |
-| Canal DSAR | RED | só e-mail genérico | alta |
-| Endpoint de eliminação | RED | nenhum | alta |
-| Audit log de acesso a PII | YELLOW | log básico, sem chain | média |
-| Criptografia em repouso | GREEN | RDS TDE | - |
-| Criptografia em trânsito | GREEN | TLS 1.3 | - |
-| Runbook de incidente | RED | nenhum | crítica |
-| DPA com operadores | RED | nenhum assinado | alta |
-| Cláusulas-padrão intl | RED | nenhuma | alta |
-| Coleta excessiva | YELLOW | telefone obrigatório sem necessidade | média |
-| Retenção definida | RED | "indefinido" em tudo | alta |
-| Treinamento equipe | RED | nunca | média |
-| ECA Digital (se aplicável) | varia | | |
+| Inventário de dados e cookies/SDKs | `{status}` | `{evidência}` | Técnica + Governança |
+| Base legal por atividade (Arts. 7º/11 + Enunciado 1/2023) | `{status}` | `{evidência}` | Jurídica + Governança |
+| Encarregado (Res. 18/2024) ou canal ATPP (Res. 2/2022, Art. 11) | `{status}` | `{evidência}` | Organizacional + Web |
+| Canais e endpoints DSAR (SLA padrão vs. ATPP) | `{status}` | `{evidência}` | Técnica + Operacional |
+| Ledger de consentimento orientado a eventos (se aplicável) | `{status}` | `{evidência}` | Técnica |
+| Criptografia em trânsito + storage/volume + campos críticos | `{status}` | `{evidência}` | Técnica / Infra |
+| Trilha de auditoria íntegra e sem PII em claro | `{status}` | `{evidência}` | Técnica |
+| Regras de retenção, bloqueio, backups e propagação | `{status}` | `{evidência}` | Técnica + Jurídica |
+| Terceiros classificados por papel + DPAs (Art. 39) | `{status}` | `{evidência}` | Contratual / Jurídica |
+| Transferência internacional (Res. 32/2026 UE ou Res. 19/2024 SCCs) | `{status}` | `{evidência}` | Contratual + Infra |
+| Runbook e registro de incidentes de 5 anos (Res. 15/2024) | `{status}` | `{evidência}` | Operacional + Governança |
+| Controles do ECA Digital (Lei 15.211/2025 + Dec. 12.880/2026) | `{status}` | `{evidência}` | Técnica + Produto |
 
-### Fase 3: Priorização
+### Fase 3: Priorização por Risco × Esforço
 
-Use matriz:
+1. **P0 — Exposição imediata / regulatória alta**: vazamento de PII em logs/rotas públicas, ausência de canal do Encarregado/ATPP, ausência de atendimento mínimo a titulares (DSAR), ausência de runbook de incidente (3 dias úteis), perfilamento ilegal de menores.
+2. **P1 — Fundamentos e contratos**: mapa de dados, bases legais/LIAs, regularização de operadores e transferências internacionais, retenção/eliminação, consent ledger íntegro.
+3. **P2 — Maturidade e defesa em profundidade**: criptografia em nível de coluna/crypto-shredding, hash chain com ancoragem externa, anonimização formal em analytics, automações avançadas.
 
-```
-Severidade × Esforço:
-- Crítica + Baixo = FAZER JÁ (sprint atual)
-- Crítica + Alto = Planejar próximas 2-4 semanas
-- Alta + Baixo = Próximas 2 semanas
-- Alta + Alto = Próximo trimestre
-- Média = Backlog priorizado
-- Baixa = Backlog
-```
+### Fase 4: Gerar `.lgpd/gaps.md` e pausar em Checkpoint
 
-### Fase 4: Plano de remediação
-
-Salve em `.lgpd/gaps.md`:
-
-```markdown
-# Gap Analysis e Plano de Remediação — {data}
-
-## Resumo
-- {N} gaps críticos
-- {M} gaps altos
-- {X} gaps médios
-- {Y} gaps baixos
-
-## Ações imediatas (próxima semana)
-1. **Designar Encarregado e publicar contato** — {responsável}, prazo {data}
-   - Skill a executar: lgpd-dpo-encarregado
-2. **Publicar política de privacidade v1** — {responsável}, prazo {data}
-   - Skill: lgpd-privacy-policy
-3. **Implementar canal DSAR mínimo** — formulário + e-mail dedicado, {responsável}, prazo {data}
-   - Skill: lgpd-dsar
-4. **Publicar runbook de incidente** — {responsável}, prazo {data}
-   - Skill: lgpd-incident-response
-
-## Próximas 2-4 semanas
-5. Inventário de dados completo (ROPA) — lgpd-data-mapping + lgpd-ropa
-6. Inventário e DPA com operadores ativos — lgpd-vendor-audit + lgpd-dpa
-7. Cláusulas-padrão para operadores intl — lgpd-international-transfer
-
-## Próximo trimestre
-8. Audit log encadeado — lgpd-audit-logging
-9. Retenção e eliminação automatizadas — lgpd-retention-erasure
-10. RIPD para atividades de alto risco — lgpd-ripd
-11. Avaliação ECA Digital (se aplicável) — lgpd-eca-digital-minors
-
-## Backlog
-12. Treinamento equipe (anual)
-13. Pentest e revisão de segurança
-14. Programa de governança em privacidade (Art. 50)
-```
-
-### Fase 5: Comunicação
-
-Apresente ao usuário:
-- Resumo executivo (3 bullets do estado atual)
-- Top 3 ações imediatas
-- ⏸ CHECKPOINT — confirme antes de seguir para próxima skill do pipeline
+Salve `.lgpd/gaps.md` separando **Ações de Engenharia (repositório)** de **Ações Jurídicas/Organizacionais (fora do repositório)** e apresente `⏸ CHECKPOINT` ao usuário antes de iniciar `L2` (`lgpd-data-mapping`).
 
 ## Status update
 
 ```markdown
 ## L1 — Legacy retrofit ✓
-- Discovery completo
-- {N} gaps identificados
-- Plano em `.lgpd/gaps.md`
-- ⏸ Aguardando aprovação para iniciar L2 (lgpd-data-mapping)
+- Discovery técnico salvo em `.lgpd/discovery.md`
+- Plano priorizado (P0/P1/P2) salvo em `.lgpd/gaps.md`
+- ⏸ Aguardando confirmação para avançar ao `lgpd-data-mapping` (L2)
 ```
-

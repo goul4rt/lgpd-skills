@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-test:
+    name: Validate Skills, Schemas & Reference Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install devDependencies
+        run: npm ci
+
+      - name: Typecheck reference implementations & tests
+        run: npm run typecheck
+
+      - name: Validate Prisma schemas & annotation extractor
+        run: npm run validate:prisma
+
+      - name: Run structural, normative & scenario test suites
+        run: npm test

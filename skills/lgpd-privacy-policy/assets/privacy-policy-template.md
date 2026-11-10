@@ -1,135 +1,83 @@
 # Política de Privacidade — {Nome do Produto}
 
-**Versão**: v{N} | **Vigência a partir de**: {data} | **Última atualização**: {data}
+> ⚠️ **Minuta técnica gerada a partir do mapeamento de dados — submeter obrigatoriamente a revisão jurídica antes de publicar.**
 
-## Resumo (TL;DR)
+**Versão**: `v{N}` | **Vigência**: `{data}` | **Última atualização**: `{data}`
 
-{Em até 5 bullets, o essencial:}
-- Coletamos {X, Y, Z} para {finalidade A, B, C}.
-- Não vendemos seus dados.
-- Compartilhamos com {operadores principais} para {motivo}.
-- Você pode {exportar, corrigir, excluir, revogar consentimento} a qualquer momento em {link}.
-- Contato do Encarregado: {e-mail}.
+## Resumo objetivo (TL;DR)
+
+- Coletamos `{categorias resumidas}` para `{finalidades principais}`.
+- Compartilhamos dados apenas com os fornecedores e parceiros descritos na seção 5.
+- Você pode acessar, corrigir, exportar, eliminar dados elegíveis ou revogar consentimentos em `{link}` ou pelo canal `{e-mail}`.
 
 ---
 
-## 1. Quem somos (Identificação do controlador)
+## 1. Quem controla seus dados (Art. 9º, III)
 
-- **Razão social**: {nome}
-- **CNPJ**: {número}
-- **Endereço**: {endereço completo}
-- **Site**: {url}
+- **Controlador**: `{Razão Social}`, inscrita no CNPJ sob nº `{CNPJ}`, com sede em `{endereço}`.
+- **Enquadramento**: `{Controlador padrão | Agente de Tratamento de Pequeno Porte nos termos da Resolução CD/ANPD nº 2/2022}`.
 
-## 2. Encarregado pela Proteção de Dados
+## 2. Encarregado pelo Tratamento / Canal de Privacidade (Art. 41 + Res. 18/2024 / Res. 2/2022)
 
-- **Nome**: {nome ou nome empresarial}
-- **E-mail**: {e-mail dedicado, ex.: encarregado@empresa.com.br}
-- **Canal**: {link do formulário ou portal}
+- `{Se Encarregado PF: Nome completo}`
+- `{Se Encarregado PJ: Razão Social + Nome completo da pessoa natural responsável}`
+- `{Se ATPP de baixo risco dispensado formalmente (Res. 2/2022, Art. 11): Canal oficial de atendimento aos titulares}`
+- **E-mail**: `{privacidade@empresa.com.br}` | **Portal**: `{https://empresa.com.br/privacidade}`
 
-## 3. Quais dados coletamos e por quê (Finalidades + Bases legais)
+## 3. Quais dados tratamos, para quais finalidades e com qual base legal (Art. 9º, I)
 
-### 3.1 Conta e autenticação
-- **Dados**: nome, e-mail, senha (hash), telefone
-- **Finalidade**: criar e operar sua conta
-- **Base legal**: execução de contrato (Art. 7º, V)
-- **Retenção**: enquanto a conta estiver ativa + 5 anos após inatividade (obrigação legal)
-
-### 3.2 Pagamento (se aplicável)
-- **Dados**: nome, e-mail, últimos 4 dígitos do cartão, endereço de cobrança
-- **Finalidade**: processar pagamentos
-- **Base legal**: execução de contrato (Art. 7º, V) + obrigação legal fiscal
-- **Operador**: {Stripe / Pagar.me / etc.}
-- **Retenção**: 5 anos (obrigação fiscal)
-
-### 3.3 Comunicação por e-mail (marketing)
-- **Dados**: nome, e-mail, preferências
-- **Finalidade**: enviar novidades, ofertas e conteúdo relevante
-- **Base legal**: consentimento (Art. 7º, I)
-- **Você pode descadastrar a qualquer momento** no link de cada e-mail ou em {link}
-
-### 3.4 Analytics
-- **Dados**: páginas visitadas, eventos de uso, device ID, IP truncado
-- **Finalidade**: entender uso para melhorar o produto
-- **Base legal**: legítimo interesse (Art. 7º, IX)
-- **Salvaguardas**: pseudonimização, agregação, retenção limitada
-
-{Repetir para cada finalidade ativa do ROPA}
-
-## 4. Como tratamos os dados (Forma e duração)
-
-- **Coleta**: através do uso do aplicativo, formulários, integrações
-- **Armazenamento**: em servidores na {região} com criptografia em repouso e em trânsito
-- **Acesso interno**: estritamente need-to-know, com controle de identidade e log
-- **Duração**: cada finalidade tem sua própria retenção (ver seção 3)
-
-## 5. Com quem compartilhamos (Uso compartilhado)
-
-| Operador | Finalidade | País | Salvaguardas |
+| Finalidade específica | Dados tratados | Base legal (LGPD) | Prazo / Critério de retenção |
 |---|---|---|---|
-| AWS | hospedagem | EUA | Cláusulas-padrão Res. 19/2024 + DPA |
-| Datadog | observabilidade | EUA | mesmo |
-| Stripe | pagamentos | EUA | mesmo |
-| {outros} | | | |
+| Criar e autenticar sua conta | Nome, e-mail, hash de senha, logs de acesso | Execução de contrato (Art. 7º, V) + Obrigação legal p/ logs (Art. 7º, II c/c Marco Civil Art. 15) | Conta ativa; logs de acesso guardados por 6 meses (Art. 15 Lei 12.965/2014) |
+| Processar pagamentos e emitir documentos fiscais | Nome, CPF, dados de cobrança, histórico da transação | Execução de contrato (Art. 7º, V) + Obrigação legal tributária (Art. 7º, II) | Documentos fiscais retidos por 5 anos contados do exercício seguinte (CTN, Art. 173, I) |
+| Enviar comunicações promocionais | Nome, e-mail, registro de opt-in | Consentimento (Art. 7º, I) | Até revogação do consentimento pelo titular (Art. 8º, § 5º) |
+| Segurança, prevenção a fraudes e estabilidade técnica | IP, identificadores técnicos de sessão, eventos de erro sem PII desnecessária | Legítimo interesse (Art. 7º, IX) | `{ex.: 90 dias}` |
 
-## 6. Transferência internacional de dados
+*(Preencher estritamente conforme `.lgpd/ROPA.md`).*
 
-Alguns dados são tratados fora do Brasil. Adotamos as cláusulas-padrão contratuais aprovadas pela ANPD (Resolução nº 19/2024) com cada um desses operadores.
+## 4. Cookies, SDKs e tecnologias similares
 
-## 7. Seus direitos (Art. 18 LGPD)
+- **Estritamente necessários**: essenciais para autenticação, segurança e funcionamento básico (não dependem de consentimento).
+- **Analíticos e funcionais não essenciais / publicitários**: desativados por padrão quando baseados em consentimento; você pode aceitar, recusar ou alterar suas escolhas a qualquer momento em `{link para Preferências de Privacidade}`.
 
-Você tem direito a:
+## 5. Compartilhamento com terceiros e seus papéis (Art. 9º, V e VI)
 
-- **Confirmar** se tratamos seus dados
-- **Acessar** seus dados (exportar)
-- **Corrigir** dados incompletos, inexatos ou desatualizados
-- **Anonimizar, bloquear ou eliminar** dados desnecessários ou tratados em desconformidade
-- **Portar** seus dados a outro fornecedor
-- **Eliminar** dados tratados com base em consentimento
-- Saber **com quem compartilhamos**
-- **Ser informado** sobre a possibilidade de não consentir
-- **Revogar consentimento** a qualquer momento
+| Terceiro / Categoria | Papel na LGPD | Finalidade específica | País / Região |
+|---|---|---|---|
+| `{Ex.: Provedor Cloud}` | Operador (Art. 39) | Hospedagem de banco e aplicação sob nossas instruções | `{Brasil / UE / EUA}` |
+| `{Ex.: Instituição de Pagamento}` | Operador no processamento / Controlador Independente em deveres regulatórios e antifraude | Liquidação financeira e prevenção a ilícitos | `{Brasil / EUA}` |
 
-Exerça em {link} ou pelo e-mail do Encarregado.
+## 6. Transferência internacional de dados (Arts. 33–36 LGPD)
 
-Prazo de resposta: até **15 dias** para resposta completa (Art. 19, II LGPD).
+Quando dados pessoais são armazenados ou acessados fora do Brasil, utilizamos mecanismos reconhecidos pela LGPD e pela ANPD:
+- **Países com Decisão de Adequação da ANPD (Art. 33, I)**: transferências para a **União Europeia e Espaço Econômico Europeu (Islândia, Liechtenstein e Noruega)** são amparadas pela **Resolução CD/ANPD nº 32/2026**.
+- **Demais jurisdições sem decisão de adequação (ex.: Estados Unidos)**: adotamos as **Cláusulas-Padrão Contratuais aprovadas pela Resolução CD/ANPD nº 19/2024 (Anexo II)** (ou mecanismo contratual equivalente admitido pela norma), combinadas com criptografia em trânsito e em armazenamento.
 
-## 8. Cookies e tecnologias similares
+## 7. Seus direitos como titular e prazos de resposta (Arts. 18, 19 e 20)
 
-{Banner de cookies + tabela das categorias: estritamente necessários, funcionais, analíticos, marketing}
+Você pode solicitar gratuitamente, a qualquer momento:
+1. Confirmação da existência de tratamento e acesso aos dados;
+2. Correção de dados incompletos, inexatos ou desatualizados;
+3. Anonimização, bloqueio ou eliminação de dados desnecessários, excessivos ou tratados em desconformidade;
+4. Portabilidade dos dados a outro fornecedor, observados os segredos comercial e industrial;
+5. Eliminação dos dados tratados com base no consentimento (ressalvadas as hipóteses legais de conservação do Art. 16);
+6. Informação sobre entidades públicas e privadas com as quais realizamos uso compartilhado;
+7. Informação sobre a possibilidade de não fornecer consentimento e sobre as consequências da negativa;
+8. Revogação do consentimento (Art. 8º, § 5º);
+9. Revisão e informações sobre critérios de decisões tomadas unicamente com base em tratamento automatizado (Art. 20), quando aplicável.
 
-## 9. Crianças e adolescentes (se aplicável)
+**Prazos de atendimento**:
+- `{Se controlador padrão: Confirmação/acesso em formato simplificado de forma imediata, e declaração clara e completa em até 15 dias corridos (Art. 19, I e II da LGPD).}`
+- `{Se ATPP (Res. CD/ANPD nº 2/2022, Art. 14): Declaração simplificada em até 15 dias e declaração completa em até 30 dias.}`
 
-{Se o produto pode ser acessado por menores:}
+## 8. Crianças e adolescentes (Art. 14 LGPD + Lei nº 15.211/2025 — se aplicável)
 
-- Não direcionamos o serviço a menores de {idade}
-- Se você é responsável legal e descobriu que seu filho usou o serviço sem seu consentimento, entre em contato em {e-mail}
-- Aplicamos a Lei nº 13.709/2018 (LGPD, Art. 14) e a Lei nº 15.211/2025 (ECA Digital)
-- Para usuários de até 16 anos, vinculamos a conta a um responsável legal (ECA Digital, Art. 24)
-- Não fazemos perfilamento publicitário de menores (ECA Digital, Arts. 22 e 26)
+`{Ajustar conforme aplicabilidade real: explicar sempre o tratamento em linguagem simples e acessível, observando o melhor interesse da criança e do adolescente (Art. 14 + Enunciado CD/ANPD nº 1/2023), a vinculação a responsável legal até 16 anos quando aplicável (Art. 24 da Lei 15.211/2025), controles de supervisão parental e a vedação integral de perfilamento publicitário de menores (Arts. 22 e 26 da Lei 15.211/2025).}`
 
-## 10. Segurança
+## 9. Segurança da informação e incidentes (Arts. 46 e 48)
 
-Adotamos medidas técnicas e administrativas para proteger seus dados, incluindo:
-- Criptografia em trânsito (TLS 1.3) e em repouso
-- Autenticação multifator para acesso administrativo
-- Controle de acesso por função
-- Monitoramento contínuo
-- Treinamento periódico da equipe
-- Plano de resposta a incidentes
+Aplicamos criptografia em trânsito (TLS), criptografia em armazenamento, controle de acesso por menor privilégio e monitoramento de eventos. Caso ocorra incidente de segurança que possa acarretar risco ou dano relevante, comunicaremos a ANPD e os titulares afetados nos termos da **Resolução CD/ANPD nº 15/2024**.
 
-Se ocorrer um incidente de segurança que afete seus dados de forma relevante, comunicaremos você e a ANPD em até 3 dias úteis, conforme Resolução CD/ANPD nº 15/2024.
+## 10. Atualizações desta Política
 
-## 11. Mudanças nesta política
-
-Esta política pode ser atualizada. Mudanças materiais serão comunicadas com antecedência razoável por e-mail ou aviso no aplicativo. O histórico de versões está disponível em {link}.
-
-## 12. Contato e ANPD
-
-- **Encarregado**: {e-mail}
-- **Autoridade Nacional de Proteção de Dados (ANPD)**: https://www.gov.br/anpd
-
----
-
-**Histórico de versões**:
-- v1.0 ({data}): publicação inicial
-- v1.1 ({data}): {mudança}
+Alterações relevantes serão informadas pelos nossos canais oficiais e, quando exigirem novo consentimento, solicitaremos sua manifestação prévia. Histórico de versões disponível em `{link}`.

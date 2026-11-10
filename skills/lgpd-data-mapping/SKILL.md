@@ -1,118 +1,113 @@
 ---
 name: lgpd-data-mapping
-description: Build and maintain a data inventory (mapa de dados) of all personal data processing activities in the project. Use when user asks "mapa de dados", "data mapping LGPD", "que dados pessoais coletamos", "inventário de tratamento", or as part of an LGPD audit pipeline. Produces `.lgpd/data-map.md`. Especially important for legacy systems where the inventory is built reverse-engineered from code (Prisma schemas, API endpoints, third-party SDKs, log statements).
+description: Build and maintain a canonical data inventory (mapa de dados) of all personal data processing activities, databases, APIs, cookies, pixels, mobile/web SDKs, telemetry streams, and third-party legal roles. Run FIRST before `lgpd-legal-basis`, `lgpd-ropa`, `lgpd-ripd`, and `lgpd-retention-erasure`. Produces `.lgpd/data-map.md`.
 ---
 
 # Data Mapping LGPD
 
-Inventário canônico de **todas** as atividades de tratamento de dados pessoais no projeto. É o pré-requisito para ROPA (Art. 37), RIPD (Art. 38), retenção e DSAR.
+Inventário canônico de **todas** as atividades de tratamento de dados pessoais no projeto. Deve ser executado **antes** de `lgpd-legal-basis` (mapa preliminar → atribuição de base legal por atividade → mapa consolidado) e serve de insumo direto para ROPA (Art. 37), RIPD (Art. 38), retenção e DSAR.
 
-## Workflow
+## Workflow de descoberta
 
-### Para greenfield
+### Em projetos Greenfield (`Pipeline A — F1`)
+1. Liste cada funcionalidade/jornada planejada que coleta, armazena, consulta, compartilha ou descarta dados relacionados a pessoa natural identificada ou identificável (Art. 5º, I).
+2. Gere o **mapa preliminar** em `.lgpd/data-map.md` com finalidades concretas, atributos, agentes externos e seus papéis jurídicos; em seguida acione `lgpd-legal-basis` (`F2`) para preencher e validar as bases legais.
 
-Liste atividades por feature/módulo do produto antes de codar. Cada feature que toca dado pessoal = uma atividade.
+### Em sistemas Legados ou Híbridos (`Pipeline B — L2`)
+Faça engenharia reversa sistemática no repositório:
+1. ** Persistência**: schemas Prisma/SQL/NoSQL, migrations, buckets de objetos (S3/GCS/R2), filas e caches (Redis).
+2. **Superfície de API e jobs**: rotas REST/GraphQL/tRPC, Server Actions, webhooks, workers e rotinas cron.
+3. **Cookies, pixels e trackers web**: leitura/escrita de cookies (`httpOnly`, sessão, atribuição, marketing), `localStorage`/`sessionStorage`, Google Tag Manager, Meta/TikTok/LinkedIn pixels, scripts de replay de sessão (Hotjar, PostHog, FullStory).
+4. **SDKs, eventos de produto e telemetria**: chamadas `identify`/`track` (Segment, Mixpanel, Amplitude, Firebase Analytics), APMs e error trackers (Sentry, Datadog — verificar se capturam headers, body, IP ou e-mail em breadcrumbs/logs).
+5. **Coletas mobile (React Native / iOS / Android)**: permissões em `app.json`, `Info.plist` e `AndroidManifest.xml`, push tokens (Expo/FCM/APNs), identificadores de dispositivo/publicidade (IDFA/GAID), geolocalização, câmera/galeria, contatos, área de transferência (*clipboard*) e armazenamento local (`AsyncStorage` vs. `SecureStore`/Keychain).
 
-### Para legacy (reverse-engineering)
+## O que registrar por atividade de tratamento
 
-1. **Schemas de banco**: leia `prisma/schema.prisma` (ou equivalente). Toda tabela com referência a usuário = candidato.
-2. **APIs**: leia rotas REST/tRPC/GraphQL. Endpoints recebendo PII = atividade.
-3. **SDKs de terceiros**: grep por nomes (Sentry, Datadog, Mixpanel, Amplitude, Segment, Stripe, Discord SDK, Firebase, OneSignal). Cada um é compartilhamento.
-4. **Logs**: cuidado — logs podem vazar PII inadvertidamente (audit também).
-5. **Cookies e localStorage** em frontends.
-6. **Coletas mobile**: device ID, geolocation, push tokens, biometria, contatos, fotos.
-
-## Por atividade, capture:
-
-- **Nome curto** (slug)
-- **Descrição** (1 linha)
-- **Finalidade específica** (Art. 6º, I)
-- **Base legal** (link para `.lgpd/legal-basis.md`)
-- **Categorias de titulares**: usuários, prospects, funcionários, dependentes, terceiros. **Flag**: contém crianças? adolescentes? idosos?
+- **ID e Nome curto** (`A001 — Autenticação de usuários`)
+- **Finalidade específica, explícita e informada** (Art. 6º, I)
+- **Base legal** (preenchida/validada em conjunto com `lgpd-legal-basis`)
+- **Categorias de titulares**: usuários finais, visitantes, candidatos, colaboradores, representantes. **Sinalizar vulnerabilidade**: envolve **crianças (< 12)**, **adolescentes (12–17)** ou **idosos (≥ 60)**?
 - **Categorias de dados**:
-  - Comuns: nome, e-mail, CPF (atenção — alguns tratam como sensível operacional), telefone, endereço, IP, device ID
-  - Sensíveis (Art. 5º, II): saúde, biometria, raça, religião, política, sindicato, sexualidade, genético
-- **Fonte/origem**: coletado do titular? observado? inferido? terceiro?
-- **Sistemas que armazenam**: tabelas, caches, S3 buckets, BigQuery, planilhas
-- **Compartilhamentos**:
-  - Internos: outros times/empresas do grupo
-  - Externos operadores: lista
-  - Transferência internacional: lista (link para `.lgpd/transfers/`)
-- **Retenção**: prazo + critério
-- **Medidas de segurança**: criptografia, RBAC, audit log
-- **Alto risco?**: Aplicar teste Res. 2/2022 Art. 4 → se sim, marca para RIPD
-- **Owner**: pessoa/time responsável
+  - **Comuns**: identificação, contato, CPF, credenciais, financeiros, logs/IP, cookies, identificadores de dispositivo, eventos comportamentais.
+  - **Sensíveis (Art. 5º, II)**: origem racial/étnica, convicção religiosa, opinião política, filiação sindical/filosófica, saúde, vida sexual, dado genético ou biométrico.
+- **Origem do dado**: fornecido pelo titular, observado (cookies/telemetria/SDK), inferido (scores/perfis) ou recebido de terceiro.
+- **Ativos e repositórios**: tabelas, caches, buckets, ferramentas de observabilidade.
+- **Agentes externos e Papel Jurídico efetivo**:
+  - Classifique **cada terceiro** como **Operador** (Art. 39), **Controlador Independente** ou **Controlador Conjunto** (nunca presuma que todo terceiro é operador!).
+- **Transferência internacional**: país/região efetiva de processamento/acesso e mecanismo aplicável (`Res. 32/2026 Adequação UE/EEE` | `Res. 19/2024 SCCs` | `N/A — 100% BR sem acesso externo`).
+- **Prazo e critério de retenção** (alinhado ao `lgpd-retention-erasure`).
+- **Triagem de Alto Risco (Res. CD/ANPD nº 2/2022, Art. 4º)**:
+  - Avaliar cumulativamente **1 critério geral** (larga escala multifatorial — número, volume, duração, frequência e alcance geográfico — **ou** impacto significativo em direitos fundamentais) **+** **1 critério específico** (IA/tecnologia emergente, vigilância pública, decisão unicamente automatizada/profiling, ou dados sensíveis/crianças/adolescentes/idosos). Se positivo → marcar para `lgpd-ripd` (ou indicar RIPD preventivo por boa prática).
 
 ## Template — `.lgpd/data-map.md`
 
 ```markdown
-# Mapa de Dados — {projeto}
+# Mapa de Dados Pessoais — {projeto}
 
-**Versão**: v{N}
-**Data**: {data}
-**Owner global**: Encarregado / DPO
+**Versão**: v{N} | **Status**: {Preliminar | Consolidado} | **Data**: {data}
+**Responsável técnico / Encarregado**: {nome ou canal ATPP}
 
-## Atividades de Tratamento
+## 1. Atividades de Tratamento
 
 ### A001 — {nome}
 
 | Campo | Valor |
 |---|---|
-| Slug | a001-{slug} |
-| Finalidade | {específica} |
-| Base legal | Art. {N}, {inciso} ([detalhes](./legal-basis.md#a001)) |
-| Categorias de titulares | usuários adultos + adolescentes |
-| Sensíveis? | Não / Sim ({quais}) |
-| Dados | nome, e-mail, IP, user-agent |
-| Fonte | coletado do titular no signup |
-| Sistemas | `users` (Postgres), `auth_sessions` (Redis), Datadog logs |
-| Operadores | AWS RDS (US-East-1), Datadog (US), Better Auth (lib local) |
-| Transferência intl. | Sim — AWS US, Datadog US (ver `.lgpd/transfers/`) |
-| Retenção | 5 anos após inatividade (obrig. legal — prescrição CDC) |
-| Segurança | TLS 1.3, TDE, RBAC, audit log |
-| Alto risco? | Não |
-| RIPD | N/A |
-| Owner | @aroldo |
+| Slug | `a001-{slug}` |
+| Finalidade (Art. 6º, I) | {finalidade específica} |
+| Base legal | {pendente F2 | Art. 7º, V — Execução de contrato ([detalhes](./legal-basis.md))} |
+| Categorias de titulares | {ex.: usuários adultos; adolescentes 14–17 (acesso provável)} |
+| Dados comuns | {ex.: nome, e-mail, hash de senha, IP de acesso} |
+| Dados sensíveis (Art. 5º, II) | {Não | Sim: especificar} |
+| Origem / Coleta | {formulário de cadastro + cookie httpOnly de sessão + SDK Sentry} |
+| Sistemas internos | `users` e `sessions` (PostgreSQL), Redis |
+| Terceiros e Papel Jurídico | AWS RDS (`sa-east-1` — **Operador**); Sentry (`us` — **Operador**); Stripe (**Operador** no checkout / **Controlador Independente** em PLD/antifraude regulatório) |
+| Transferência internacional | Sim — Sentry (EUA → SCCs Res. 19/2024); ou UE (Res. 32/2026 Adequação) |
+| Retenção | Conta ativa; logs de acesso a aplicação por 6 meses (Marco Civil, Art. 15) |
+| Controles de segurança | TLS 1.3, criptografia de storage em repouso, RBAC, scrubbing de PII em logs |
+| Alto risco (Res. 2/2022 Art. 4º)? | {Não (ausência de critério geral/específico cumulativos) | Sim → RIPD obrigatório | RIPD preventivo recomendado} |
+| Owner | {@time-responsavel} |
 
-### A002 — ...
+## 2. Inventário de Cookies, SDKs e Telemetria
+
+| Nome / Identificador | Tipo | Finalidade | Papel do Terceiro | Estritamente necessário? | Bloqueado antes do consentimento? |
+|---|---|---|---|---|---|
+| `better-auth.session_token` | Cookie `httpOnly` | Sessão autenticada | Próprio | Sim | N/A (execução contratual) |
+| `@sentry/nextjs` | SDK Web/Server | Rastreamento de erros | Operador | Não (legítimo interesse c/ scrubbing) | PII redigida (`sendDefaultPii: false`) |
+| `_fbp` / Pixel | Tracker terceiros | Atribuição de marketing | Controlador Conjunto / Operador | Não (exige consentimento; proibido p/ < 18 no ECA Digital) | Sim |
 ```
 
-## Annotations no schema (greenfield)
-
-Sugira ao usuário anotações em comentários do Prisma schema:
+## Anotações no Prisma Schema (opcional para Greenfield/CI)
 
 ```prisma
 /// @lgpd:activity=a001
 /// @lgpd:purpose="autenticação e gestão de conta"
-/// @lgpd:legal_basis="art_7_v"  // execução de contrato
-/// @lgpd:retention="5y_after_inactivity"
+/// @lgpd:legal_basis="art_7_v"
+/// @lgpd:retention="active_account_plus_mci_6m_logs"
 /// @lgpd:sensitive=false
 model User {
-  id        String   @id
-  email     String   @unique  /// @lgpd:pii=high
-  cpf       String?  /// @lgpd:pii=high @lgpd:masked=true
-  // ...
+  id    String  @id @default(cuid())
+  email String  @unique /// @lgpd:pii=direct
+  cpf   String? /// @lgpd:pii=high @lgpd:encrypted=true
 }
 ```
 
-Script auxiliar para extrair anotações: `assets/extract-prisma-annotations.sh`.
+Script auxiliar para extração automática: [`assets/extract-prisma-annotations.sh`](assets/extract-prisma-annotations.sh).
 
 ## Checklist de qualidade
 
-- [ ] Toda tabela com FK para `User` está coberta
-- [ ] Toda integração de terceiro está listada como compartilhamento
-- [ ] Toda atividade tem base legal explícita
-- [ ] Atividades de alto risco estão flagadas
-- [ ] Atividades com menores estão flagadas (ECA Digital aplicável)
-- [ ] Retenção definida (sem "indefinido")
+- [ ] Todas as tabelas/coleções com dados pessoais estão vinculadas a pelo menos uma atividade
+- [ ] Cookies, pixels, SDKs mobile/web e fluxos de observabilidade/logs foram inventariados
+- [ ] Cada fornecedor externo possui classificação explícita de papel (`Operador`, `Controlador Independente` ou `Controlador Conjunto`)
+- [ ] Atividades com crianças/adolescentes sinalizam avaliação do melhor interesse (Enunciado 1/2023) e ECA Digital
+- [ ] Avaliação de alto risco aplicou o teste cumulativo da Res. 2/2022, Art. 4º (sem atalhos numéricos fixos)
 
-Ao terminar, atualize `.lgpd/STATUS.md`:
+## Status update
 
 ```markdown
-## F2 — Data mapping ✓
-- {N} atividades inventariadas
-- {N} envolvem dados sensíveis
-- {N} envolvem menores
-- {N} marcadas como alto risco → RIPD pendente: {lista}
-- Próximo: lgpd-consent-schema (greenfield) ou lgpd-legal-basis (legacy)
+## F1 / L2 — Data mapping ✓
+- {N} atividades de tratamento e {K} cookies/SDKs inventariados
+- {S} envolvem dados sensíveis | {M} envolvem menores
+- {R} sinalizadas para RIPD ({obrigatório vs. preventivo})
+- Próximo passo: `lgpd-legal-basis`
 ```

@@ -53,7 +53,7 @@ Para fixar uma versão:
 
 ```json
 {
-  "plugin": ["lgpd-skills@git+https://github.com/goul4rt/lgpd-skills.git#v1.2.0"]
+  "plugin": ["lgpd-skills@git+https://github.com/goul4rt/lgpd-skills.git#v1.3.0"]
 }
 ```
 

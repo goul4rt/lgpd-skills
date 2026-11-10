@@ -1,64 +1,57 @@
 # Legitimate Interest Assessment (LIA) — Template
 
-Para uso quando a base legal escolhida é Art. 7º, IX (legítimo interesse). Sem LIA documentado, a base é frágil em fiscalização da ANPD.
+Obrigatório como evidência de responsabilização (Art. 6º, X + Art. 10, § 3º LGPD) sempre que a base legal avaliada for o **legítimo interesse (Art. 7º, IX)**. Lembre-se: legítimo interesse **não se aplica a dados pessoais sensíveis (Art. 11)**.
 
 ## Identificação
 
-- **Atividade**: {nome}
-- **Controlador**: {nome jurídico}
-- **Data**: {data}
-- **Versão**: {N}
-- **Próxima revisão**: {data}
+- **Atividade (ref. `data-map.md`)**: {A00X — nome}
+- **Controlador**: {razão social}
+- **Data**: {data} | **Versão**: {vN} | **Próxima revisão**: {data}
 
-## 1. Teste de Finalidade (Purpose Test)
+## 1. Teste de Finalidade (Legitimidade do Interesse)
 
-- **Qual o interesse legítimo perseguido?**
-- **É um interesse lícito, específico e real (não hipotético)?**
-- **Quem se beneficia?** (controlador, terceiro, titular, sociedade)
-- **Sem o tratamento, qual o prejuízo concreto?**
+- **Qual é o interesse concreto perseguido pelo controlador ou terceiro?** (Art. 10, caput e incisos I/II)
+- **A situação é concreta e atual (não meramente especulativa ou futura)?**
+- **A finalidade é lícita e compatível com o ordenamento brasileiro (incluindo LGPD, CDC e ECA Digital)?**
 
-## 2. Teste de Necessidade (Necessity Test)
+## 2. Teste de Necessidade (Minimização — Art. 10, § 1º)
 
-- **O tratamento é estritamente necessário para a finalidade?** (Art. 10, II)
-- **Há forma menos invasiva de atingir a mesma finalidade?**
-- **Os dados coletados são os mínimos para a finalidade?** (Art. 6º, III — necessidade)
+- **Os dados pessoais selecionados são estritamente necessários para a finalidade pretendida?** (Art. 10, § 1º)
+- **Existe alternativa menos intrusiva (ex.: dados agregados/anonimizados) que atinja o mesmo resultado?**
+- **Quais campos foram descartados por minimização?**
 
-## 3. Teste de Balanceamento (Balancing Test)
+## 3. Teste de Balanceamento e Legítima Expectativa (Art. 10, II)
 
-| Fator | Avaliação |
+| Dimensão | Análise concreta |
 |---|---|
-| Expectativa razoável do titular | {alta/média/baixa} — justifique |
-| Impacto potencial sobre direitos do titular | {leve/moderado/severo} |
-| Categoria do dado | {comum / quasi-sensível / contextual} |
-| Vulnerabilidade do titular | {nenhuma / criança / idoso / hipossuficiente} |
-| Forma de coleta | {transparente / inferida / observada} |
-| Salvaguardas existentes | {minimização, criptografia, opt-out, etc.} |
+| Relação prévia com o titular | {usuário ativo / ex-cliente / visitante sem vínculo} |
+| Legítima expectativa do titular (Art. 10, II) | {alta / média / baixa — explicar contexto no momento da coleta} |
+| Impacto potencial sobre direitos e liberdades | {baixo / moderado / elevado — riscos financeiros, morais, discriminatórios} |
+| Vulnerabilidade dos titulares | {adultos comuns / idosos / adolescentes / crianças — se menores, aplicar teste reforçado do melhor interesse conforme Art. 14 e Enunciado CD/ANPD nº 1/2023} |
+| Origem do dado | {fornecido pelo titular / observado no uso / inferido / obtido de terceiro} |
+| Salvaguardas e opt-out | {transparência prévia, oposição facilitada em 1 clique, pseudonimização} |
 
-**Conclusão do balanceamento**: o interesse do controlador {prevalece / não prevalece} sobre os direitos e liberdades do titular porque {justificativa}.
+**Conclusão fundamentada do balanceamento**: {demonstrar por que direitos e liberdades fundamentais do titular não prevalecem, ou concluir pela inviabilidade do legítimo interesse}.
 
-## 4. Salvaguardas adotadas
+## 4. Salvaguardas obrigatórias (Art. 10, § 2º)
 
-- [ ] Transparência ativa (informar na política de privacidade)
-- [ ] Mecanismo de oposição fácil (opt-out em 1 clique)
-- [ ] Minimização de dados
-- [ ] Limitação de retenção
-- [ ] Acesso restrito (need-to-know)
-- [ ] Criptografia
-- [ ] Pseudonimização
-- [ ] Outras: {especificar}
+- [ ] Transparência clara na Política de Privacidade e no momento/contexto relevante
+- [ ] Mecanismo gratuito e facilitado de oposição (*opt-out*) e respeito imediato à escolha
+- [ ] Minimização estrita de atributos e prazo de retenção curto/definido
+- [ ] Pseudonimização ou agregação sempre que tecnicamente viável
+- [ ] Proibição absoluta de uso para perfilamento publicitário de menores (ECA Digital, Arts. 22 e 26)
 
-## 5. RIPD necessário?
+## 5. Avaliação de Alto Risco e necessidade de RIPD (Art. 10, § 3º + Res. 2/2022, Art. 4º)
 
-A ANPD pode exigir RIPD para legítimo interesse (Art. 10, § 3º). Avaliar:
-- Tratamento envolve perfilamento, decisão automatizada, vigilância, dados sensíveis, menores?
-- Larga escala (> 2 milhões de titulares)?
+A ANPD pode solicitar RIPD quando o tratamento tiver como fundamento o legítimo interesse (Art. 10, § 3º). Além disso, verifique o **teste cumulativo da Res. CD/ANPD nº 2/2022, Art. 4º**:
+- **Critério geral presente?** Larga escala (avaliada de forma multifatorial: número de titulares, volume, duração, frequência e alcance geográfico — sem corte numérico fixo) **OU** potencial de afetar significativamente interesses e direitos fundamentais?
+- **Critério específico presente?** Tecnologias emergentes/IA, vigilância de áreas públicas, decisões automatizadas/profiling, ou dados de crianças, adolescentes ou idosos?
 
-Se sim → produzir RIPD via `lgpd-ripd`.
+- **Resultado**: {Não configura alto risco cumulativo | Configura alto risco → elaborar RIPD obrigatório | Elaborar RIPD preventivo por boa prática}
 
-## 6. Decisão
+## 6. Parecer e Aprovação
 
-- [ ] Aprovo o uso de legítimo interesse para esta atividade
-- [ ] Rejeito — recomendo migrar para {outra base}
+- [ ] **Aprovado** o uso do Art. 7º, IX com as salvaguardas da seção 4
+- [ ] **Reprovado** — alterar arquitetura ou migrar para outra hipótese legal ({especificar})
 
-**Responsável pela decisão**: {Encarregado / Jurídico}
-**Data**: {data}
+**Revisado por (Encarregado / Jurídico)**: {nome} — **Data**: {data}

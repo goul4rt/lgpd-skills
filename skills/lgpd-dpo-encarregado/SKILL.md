@@ -1,76 +1,68 @@
 ---
 name: lgpd-dpo-encarregado
-description: Designate and publish the Encarregado (DPO) per LGPD Art. 41 + Resolução CD/ANPD nº 18/2024. Use when user asks 'designar DPO', 'encarregado LGPD', 'quem é o DPO', or as part of audit pipeline. Note ATPP exemption (Res. 2/2022 Art. 11) but recommend designation anyway as best practice.
+description: Designate and publish the Encarregado (DPO) per LGPD Art. 41 and Resolução CD/ANPD nº 18/2024, OR document the ATPP low-risk exemption with a mandatory communication channel under Resolução CD/ANPD nº 2/2022 Art. 11. Run before consolidating ROPA and Privacy Policy. Produces `.lgpd/encarregado.md`.
 ---
 
-# Encarregado / DPO (Art. 41 LGPD + Res. 18/2024)
+# Encarregado pelo Tratamento de Dados (Art. 41 LGPD + Res. 18/2024)
 
-## Quem pode ser
+Define a governança do ponto focal de comunicação com titulares e com a ANPD **antes** da consolidação do ROPA (`lgpd-ropa`), do fluxo DSAR (`lgpd-dsar`) e da Política de Privacidade (`lgpd-privacy-policy`).
 
-- **Pessoa natural OU pessoa jurídica** (Res. 18/2024, Art. 3º + 12)
-- Não precisa de certificação formal
-- Não precisa residir no Brasil
-- Pode ser interno ou externo (outsourced DPO é prática comum em ATPP)
-- **Vedado conflito de interesse** (Res. 18/2024, Art. 2º, II) — diretor jurídico ou de TI pode ter conflito; avaliar
+## Duas rotas válidas conforme o porte e o risco
 
-## Atribuições mínimas (Art. 41, § 2º)
+### Rota A — Designação formal de Encarregado (regra geral — Art. 41 + Res. CD/ANPD nº 18/2024)
+Obrigatória para todos os controladores fora do regime de ATPP e também para **ATPPs que realizem tratamento de alto risco** (teste cumulativo do Art. 4º da Res. 2/2022):
+- **Natureza**: pessoa natural (interna ou externa) **ou** pessoa jurídica (**DPO as a Service** — caso PJ, deve constar o nome empresarial **e** o nome completo da pessoa natural responsável — Res. 18/2024, Art. 9º, § 1º).
+- **Ato formal**: designado por documento escrito, datado e assinado, mantido à disposição da ANPD quando solicitado (Res. 18/2024, Art. 3º).
+- **Substituto**: indicar formalmente substituto para ausências, impedimentos ou vacâncias (Res. 18/2024, Art. 5º).
+- **Prevenção de conflito de interesse** (Res. 18/2024, Art. 2º, II e Arts. 17–19): o Encarregado não deve acumular função que determine autonomamente finalidades e meios de tratamento sem salvaguardas de independência (atenção a CEOs, CTOs, CISOs ou heads de produto/marketing acumulando o papel).
+- **Responsabilidade**: a responsabilidade perante a ANPD pela conformidade do tratamento é do **agente de tratamento**, não do Encarregado (Res. 18/2024, Art. 15, § 2º).
 
-1. Aceitar reclamações e comunicações dos titulares
-2. Receber comunicações da ANPD
-3. Orientar funcionários e contratados sobre práticas
-4. Executar demais atribuições do controlador
+### Rota B — Dispensa formal para ATPP de baixo risco (Res. CD/ANPD nº 2/2022, Art. 11)
+O Agente de Tratamento de Pequeno Porte que **não** realize tratamento de alto risco:
+- **Não é obrigado a indicar Encarregado formal**, **MAS tem obrigação legal expressa de disponibilizar um canal de comunicação** para atender o titular (Art. 11, § 1º da Res. 2/2022 — ex.: endereço de e-mail dedicado `privacidade@dominio.com.br` e/ou formulário público).
+- Nota de governança: a indicação voluntária de Encarregado por ATPP é considerada **política de boas práticas** para fins de atenuante (Res. 2/2022, Art. 11, § 2º e Art. 52, § 1º, IX da LGPD), mas deve ser tratada como opção estratégica, não imposição legal.
 
-## Atribuições expandidas (Res. 18/2024, Arts. 15-16)
+## Divulgação pública obrigatória (Res. 18/2024, Art. 9º e Art. 13)
 
-- Auxiliar na elaboração de ROPA, RIPD, DPAs
-- Auxiliar na comunicação de incidentes
-- Auxiliar em transferência internacional
-- Auxiliar no programa de governança em privacidade (Art. 50 LGPD)
-- Promover privacy-by-design
+No sítio eletrônico (ou dentro do app, se não houver site), em local de **destaque e fácil acesso**, em **língua portuguesa**:
+- **Se Rota A (Pessoa Natural)**: nome completo + canal(is) de contato (e-mail dedicado e/ou formulário).
+- **Se Rota A (Pessoa Jurídica)**: nome empresarial / título do estabelecimento + nome completo da pessoa natural responsável + canal(is) de contato.
+- **Se Rota B (ATPP dispensado)**: identificação clara do **canal de comunicação para assuntos de privacidade e direitos do titular** (Art. 11, § 1º da Res. 2/2022).
 
-## Divulgação obrigatória
+## Atribuições (Art. 41, § 2º LGPD + Res. 18/2024, Arts. 15–16)
 
-- **No site, em local de destaque** (Res. 18/2024, Art. 9º)
-- Nome completo (se PF) ou nome empresarial + responsável técnico (se PJ)
-- Canal de contato (e-mail é o mínimo; portal é melhor)
-- Em PT-BR (Res. 18/2024, Art. 13)
-- Não é necessário comunicar a ANPD proativamente — ato formal deve estar disponível "quando solicitado" (Res. 18/2024, Art. 3º, § 2º)
-
-## ATPP — dispensa formal
-
-Res. 2/2022, Art. 11 dispensa designação para ATPP de baixo risco, mas exige **canal de comunicação**. Recomendação: designar mesmo assim — custo baixo, proteção alta.
+1. Aceitar reclamações e comunicações dos titulares, prestar esclarecimentos e adotar providências.
+2. Receber comunicações da ANPD e adotar providências.
+3. Orientar funcionários e contratados a respeito das práticas de proteção de dados.
+4. Prestar assistência e orientação estratégica ao controlador na elaboração de **ROPA**, **RIPD**, **regras de boas práticas**, **cláusulas contratuais/transferências internacionais** e **comunicação de incidentes de segurança**.
 
 ## Template — `.lgpd/encarregado.md`
 
 ```markdown
-# Encarregado pela Proteção de Dados
+# Governança de Encarregado / Canal de Privacidade
 
-**Designado por**: {ato formal — ata, contrato, resolução}
-**Data de designação**: {data}
-**Tipo**: PF / PJ
-**Nome**: {nome completo ou nome empresarial}
-**Responsável técnico** (se PJ): {nome}
-**Contato**:
-- E-mail: encarregado@dominio.com.br
-- Telefone: (XX) XXXX-XXXX
-- Portal: https://dominio.com.br/encarregado
+**Regime adotado**: `{Rota A — Encarregado formal (Res. 18/2024) | Rota B — ATPP de baixo risco dispensado com canal obrigatório (Res. 2/2022, Art. 11)}`
+**Data de formalização**: `{data}`
 
-**Atribuições conferidas**: ver Res. 18/2024 + atribuições internas definidas no anexo
+## Se Rota A — Encarregado Designado
+- **Ato formal de designação**: `{referência ao documento assinado}`
+- **Modalidade**: `{Pessoa Natural | Pessoa Jurídica}`
+- **Nome / Razão Social**: `{preencher}`
+- **Pessoa natural responsável (obrigatório se PJ)**: `{nome completo}`
+- **Substituto formal (Res. 18/2024, Art. 5º)**: `{nome completo e contato}`
+- **Avaliação de conflito de interesses**: `{realizada em YYYY-MM-DD — conclusão e mitigação}`
 
-**Conflito de interesse avaliado em**: {data}
-**Conclusão**: sem conflito identificado
-
-**Divulgação**: publicada em https://dominio.com.br/privacidade#encarregado
+## Canal Público de Comunicação (obrigatório nas Rotas A e B)
+- **E-mail dedicado**: `privacidade@{dominio}`
+- **Portal / Formulário**: `https://{dominio}/privacidade#contato`
+- **URL pública de divulgação**: `https://{dominio}/privacidade`
 ```
 
 ## Status update
 
 ```markdown
-## F11 — Encarregado ✓
-- Designado: {nome}
-- Tipo: PF/PJ
-- Publicado em: {URL}
-- Canal ativo: {e-mail}
-- Próximo: lgpd-ripd (se alto risco) ou lgpd-vendor-audit
+## F3 / L4 — Encarregado / Canal de Privacidade ✓
+- Regime: {Encarregado formal Res. 18/2024 | Dispensa ATPP Art. 11 Res. 2/2022}
+- Canal público configurado: {e-mail / URL}
+- Próximo passo: auditoria de fornecedores, DPAs e transferências internacionais
 ```
-

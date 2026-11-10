@@ -1,247 +1,301 @@
-# DSAR Endpoints — Next.js + Better Auth
+# DSAR Endpoints — Next.js + Better Auth + Prisma
 
-## GET /api/me
+Exemplos alinhados aos módulos testados desta coleção:
+- Ledger de eventos de consentimento: `skills/lgpd-consent-schema/assets/consent-ledger.ts`
+- Auditoria serializada sem vazamento de `req`/payload: `skills/lgpd-audit-logging/assets/audit-log.ts`
+- Cálculo de SLA (Padrão vs. ATPP) e disposição de eliminação: `skills/lgpd-dsar/assets/dsar-sla.ts`
 
-Resposta imediata em formato simplificado (Art. 19, I).
+## GET /api/me — Confirmação e Acesso Simplificado (Art. 18, I e II + Art. 19, I)
+
+Para usuários autenticados, entrega resposta simplificada imediata (nota: em canais manuais/assíncronos, ATPPs dispõem de até **15 dias** para a declaração simplificada conforme **Res. CD/ANPD nº 2/2022, Art. 14, I**).
 
 ```ts
 // app/api/me/route.ts
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { hasActiveConsent } from "@/lib/privacy/consent-ledger";
+import { logAudit } from "@/lib/privacy/audit-log";
+
+const CONSENT_PURPOSES = ["marketing_email", "analytics_cookies"] as const;
 
 export async function GET(req: Request) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session) return new Response("Unauthorized", { status: 401 });
 
   const userId = session.user.id;
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, fullName: true, createdAt: true },
+  });
 
-  const [user, consents, activeProcessing] = await Promise.all([
-    db.user.findUnique({ where: { id: userId } }),
-    db.consentRecord.findMany({
-      where: { subjectId: userId, status: "GRANTED" }
-    }),
-    db.processingActivity.findMany({
-      where: { subjects: { has: userId } }
-    })
-  ]);
+  const activeConsents = await Promise.all(
+    CONSENT_PURPOSES.map(async (purpose) => ({
+      purpose,
+      active: await hasActiveConsent(db, { subjectId: userId, purpose }),
+    })),
+  );
 
-  await logDsar(userId, "DSAR_RECEIVED", "confirmation_simplified");
+  await logAudit(db, {
+    actorId: userId,
+    actorType: "USER",
+    action: "DSAR_SIMPLIFIED_ACCESS",
+    resource: `User:${userId}`,
+    subjectId: userId,
+    legalBasis: "ART_18_I_II",
+    purpose: "dsar_confirmation_simplified",
+    redactedMetadata: { format: "simplified_json" },
+    req,
+  });
 
   return Response.json({
-    confirmation: "Yes, we process your personal data.",
-    activities: activeProcessing.map(a => ({
-      name: a.name,
-      purpose: a.purpose,
-      legalBasis: a.legalBasis
-    })),
-    consents: consents.map(c => ({ purpose: c.purpose, grantedAt: c.grantedAt })),
-    encarregado: {
-      name: process.env.DPO_NAME,
-      email: process.env.DPO_EMAIL
+    confirmation: true,
+    profile: user,
+    consents: activeConsents,
+    privacyContact: {
+      nameOrChannel: process.env.PRIVACY_CONTACT_NAME ?? "Canal de Privacidade",
+      email: process.env.PRIVACY_CONTACT_EMAIL,
     },
-    yourRightsUrl: "/privacy/your-rights"
+    completeExportEndpoint: "/api/me/export",
   });
 }
 ```
 
-## GET /api/me/export
+## GET /api/me/export — Declaração Completa e Portabilidade (Art. 18, II e V + Art. 19, II)
 
-Acesso completo + portabilidade. Job assíncrono se o volume for grande.
+Prazo máximo legal quando processado de forma assíncrona: **15 dias corridos** para controlador padrão (`Art. 19, II`) ou **30 dias corridos** para ATPP (`Res. 2/2022, Art. 14, caput`).
 
 ```ts
 // app/api/me/export/route.ts
+import { createHash } from "node:crypto";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { logAudit } from "@/lib/privacy/audit-log";
+
 export async function GET(req: Request) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session) return new Response("Unauthorized", { status: 401 });
 
   const url = new URL(req.url);
-  const format = url.searchParams.get("format") ?? "json"; // json | csv | portable
+  const format = url.searchParams.get("format") === "portable" ? "portable" : "complete";
 
-  // Para volumes pequenos: sync
-  // Para volumes grandes: enfileirar e responder com URL de download em ~5min
-  const bundle = await buildUserDataBundle(session.user.id, format);
+  // Deve incluir dados cadastrais, eventos de consentimento, origem, critérios,
+  // finalidades e categorias de destinatários (Art. 19, II), resguardado segredo comercial.
+  const payload = await buildSubjectDataPackage(session.user.id, format);
+  const serialized = JSON.stringify(payload, null, 2);
+  const bundleSha256 = createHash("sha256").update(serialized, "utf8").digest("hex");
 
-  await logDsar(session.user.id, "DSAR_FULFILLED", "export", {
-    bundleHash: sha256(bundle)
+  await logAudit(db, {
+    actorId: session.user.id,
+    actorType: "USER",
+    action: "DSAR_EXPORT_FULFILLED",
+    resource: `User:${session.user.id}`,
+    subjectId: session.user.id,
+    legalBasis: format === "portable" ? "ART_18_V" : "ART_19_II",
+    purpose: "dsar_complete_export",
+    redactedMetadata: { format, bundleSha256 },
+    req,
   });
 
-  return new Response(bundle, {
+  return new Response(serialized, {
     headers: {
-      "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="my-data-${Date.now()}.json"`
-    }
+      "Content-Type": "application/json; charset=utf-8",
+      "Content-Disposition": `attachment; filename="lgpd-${format}-${Date.now()}.json"`,
+    },
   });
 }
 ```
 
-## PATCH /api/me/profile
-
-Correção (Art. 18, III).
+## PATCH /api/me/profile — Correção + Propagação a Operadores (Art. 18, III e § 6º)
 
 ```ts
-export async function PATCH(req: Request) {
-  const session = await requireAuth(req);
-  const body = await req.json();
+// app/api/me/profile/route.ts
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { logAudit } from "@/lib/privacy/audit-log";
 
-  // Whitelist de campos editáveis pelo titular
-  const allowed = ["fullName", "phone", "addressLine1", "city"];
+const EDITABLE_FIELDS = new Set(["fullName", "phone", "addressLine1", "city"]);
+
+export async function PATCH(req: Request) {
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) return new Response("Unauthorized", { status: 401 });
+
+  const body = (await req.json()) as Record<string, unknown>;
   const updates = Object.fromEntries(
-    Object.entries(body).filter(([k]) => allowed.includes(k))
+    Object.entries(body).filter(([k, v]) => EDITABLE_FIELDS.has(k) && typeof v === "string"),
   );
 
-  const before = await db.user.findUnique({ where: { id: session.user.id } });
-  const after = await db.user.update({
-    where: { id: session.user.id },
-    data: updates
+  await db.$transaction(async (tx) => {
+    await tx.user.update({ where: { id: session.user.id }, data: updates });
+    // Art. 18, § 6º — enfileira propagação imediata aos operadores relevantes
+    await tx.operatorPropagationOutbox.createMany({
+      data: ["customer_io", "stripe"].map((operatorSlug) => ({
+        subjectId: session.user.id,
+        operatorSlug,
+        operation: "CORRECTION",
+      })),
+    });
   });
 
-  await logDsar(session.user.id, "DSAR_FULFILLED", "correction", {
-    fields: Object.keys(updates),
-    beforeHash: sha256(before),
-    afterHash: sha256(after)
+  await logAudit(db, {
+    actorId: session.user.id,
+    actorType: "USER",
+    action: "DSAR_CORRECTION_FULFILLED",
+    resource: `User:${session.user.id}`,
+    subjectId: session.user.id,
+    legalBasis: "ART_18_III",
+    purpose: "dsar_rectification",
+    redactedMetadata: { updatedFields: Object.keys(updates) },
+    req,
   });
 
-  return Response.json({ updated: Object.keys(updates) });
+  return Response.json({ updatedFields: Object.keys(updates) });
 }
 ```
 
-## POST /api/me/erasure
-
-Eliminação (Art. 18, VI) com checagem de retenção legal.
+## POST /api/me/erasure — Eliminação, Bloqueio Seletivo, Tombstone de Backup e Propagação (Arts. 15, 16 e 18, VI e § 6º)
 
 ```ts
+// app/api/me/erasure/route.ts
+import { createHmac } from "node:crypto";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { planErasureDisposition } from "@/lib/privacy/dsar-sla";
+import { logAudit } from "@/lib/privacy/audit-log";
+
 export async function POST(req: Request) {
-  const session = await requireAuth(req);
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) return new Response("Unauthorized", { status: 401 });
+
   const userId = session.user.id;
-  const { confirmation } = await req.json();
-
+  const { confirmation } = (await req.json()) as { confirmation?: string };
   if (confirmation !== "EXCLUIR MINHA CONTA") {
-    return new Response("Bad confirmation", { status: 400 });
+    return new Response("Confirmation mismatch", { status: 400 });
   }
 
-  // 1. Verificar retenções legais obrigatórias
-  const retentions = await checkLegalRetentions(userId);
-  // ex: ["fiscal:5y", "trabalhista:5y"]
+  // Consulta apenas obrigações legais específicas vigentes (ex.: NF-e emitida sob CTN Art. 173, I)
+  const obligations = await findSpecificStatutoryRetentions(userId);
+  const disposition = planErasureDisposition(obligations);
 
-  if (retentions.length > 0) {
-    // Bloqueio lógico + anonimização parcial
-    await db.user.update({
-      where: { id: userId },
-      data: {
-        email: `anonymized-${userId}@deleted.local`,
-        fullName: "Usuário removido",
-        cpf: null, // crypto-shred
-        phone: null,
-        deletedAt: new Date(),
-        retentionUntil: maxDate(retentions)
-      }
+  const subjectHmac = createHmac("sha256", Buffer.from(process.env.BACKUP_SUPPRESSION_KEY_B64!, "base64"))
+    .update(userId, "utf8")
+    .digest("hex");
+
+  await db.$transaction(async (tx) => {
+    if (disposition.mode === "BLOCK_AND_MINIMIZE") {
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          email: `blocked-${userId}@erased.invalid`,
+          phone: null,
+          avatarUrl: null,
+          marketingOptIn: false,
+          blockedAt: new Date(),
+          retentionUntil: disposition.retainUntil,
+        },
+      });
+    } else {
+      await tx.user.delete({ where: { id: userId } });
+    }
+
+    // Evita ressurreição caso um snapshot de backup anterior precise ser restaurado
+    await tx.erasureSuppressionTombstone.upsert({
+      where: { subjectHmac },
+      create: {
+        subjectHmac,
+        scope:
+          disposition.mode === "HARD_DELETE"
+            ? "FULL_ERASURE"
+            : "PARTIAL_NON_STATUTORY_FIELDS",
+      },
+      update: { erasedAt: new Date() },
     });
-  } else {
-    // Hard delete + cascata
-    await hardDeleteUserCascade(userId);
-  }
 
-  // 2. Propagar a operadores
-  await propagateErasure(userId);
+    // Art. 18, § 6º — propaga imediatamente aos operadores externos
+    await tx.operatorPropagationOutbox.createMany({
+      data: ["mixpanel", "customer_io", "sentry"].map((operatorSlug) => ({
+        subjectId: userId,
+        operatorSlug,
+        operation: "ERASURE",
+      })),
+    });
+  });
 
-  // 3. Revogar todas as sessões
   await auth.api.revokeAllSessions({ headers: req.headers });
 
-  await logDsar(userId, "DSAR_FULFILLED", "erasure", {
-    type: retentions.length > 0 ? "blocked_then_anonymized" : "hard_deleted",
-    retentions
+  await logAudit(db, {
+    actorId: userId,
+    actorType: "USER",
+    action: "DSAR_ERASURE_PROCESSED",
+    resource: `User:${userId}`,
+    subjectId: userId,
+    legalBasis: "ART_18_VI_ART_16",
+    purpose: "dsar_erasure",
+    redactedMetadata: {
+      mode: disposition.mode,
+      statutoryBases: disposition.mode === "BLOCK_AND_MINIMIZE" ? disposition.statutoryBases : [],
+    },
+    req,
   });
 
   return Response.json({
-    status: "ok",
-    type: retentions.length > 0 ? "anonymized" : "deleted",
-    retentions
+    mode: disposition.mode,
+    retainedUntil: disposition.retainUntil?.toISOString() ?? null,
+    statutoryBases: disposition.mode === "BLOCK_AND_MINIMIZE" ? disposition.statutoryBases : [],
   });
 }
 ```
 
-## POST /api/consent/revoke
+## POST /api/consent/revoke — Revogação Orientada a Eventos (Art. 8º, § 5º e Art. 18, IX)
 
-Revogação de consentimento (Art. 18, IX).
+Usa o mesmo modelo `ConsentEvent` de `lgpd-consent-schema` (preenchendo `rootConsentId`, `policyVersionId`, `occurredAt`, `channel` e `evidenceHash` sem gambiarras semânticas):
 
 ```ts
-export async function POST(req: Request) {
-  const session = await requireAuth(req);
-  const { purpose } = await req.json();
+// app/api/consent/revoke/route.ts
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { revokeConsent } from "@/lib/privacy/consent-ledger";
+import { logAudit } from "@/lib/privacy/audit-log";
 
-  // Cria registro append-only de revogação
-  await db.consentRecord.create({
-    data: {
-      subjectId: session.user.id,
-      purpose,
-      status: "REVOKED",
-      revokedAt: new Date(),
-      legalBasis: "CONSENT",
-      policyVersionId: await getCurrentPolicyId(),
+export async function POST(req: Request) {
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) return new Response("Unauthorized", { status: 401 });
+
+  const { purpose } = (await req.json()) as { purpose?: string };
+  if (!purpose) return new Response("Missing purpose", { status: 400 });
+
+  const result = await revokeConsent(db, {
+    subjectId: session.user.id,
+    purpose,
+    evidence: {
+      forwardedFor: req.headers.get("x-forwarded-for"),
+      userAgent: req.headers.get("user-agent"),
       channel: "API",
-      evidenceHash: hashEvidence(req),
-      grantedAt: new Date() // marker, not the original grant
-    }
+    },
+    propagatedTo: ["mixpanel", "customer_io"],
   });
 
-  // Propaga aos operadores
-  await propagateRevocation(session.user.id, purpose);
+  if (result.revoked) {
+    await db.operatorPropagationOutbox.createMany({
+      data: ["mixpanel", "customer_io"].map((operatorSlug) => ({
+        subjectId: session.user.id,
+        operatorSlug,
+        operation: "CONSENT_REVOCATION",
+      })),
+    });
+  }
 
-  await logDsar(session.user.id, "DSAR_FULFILLED", "consent_revoke", { purpose });
+  await logAudit(db, {
+    actorId: session.user.id,
+    actorType: "USER",
+    action: "CONSENT_REVOKED",
+    resource: `Consent:${session.user.id}:${purpose}`,
+    subjectId: session.user.id,
+    legalBasis: "ART_8_5_ART_18_IX",
+    purpose,
+    redactedMetadata: { revoked: result.revoked, rootConsentId: result.event?.rootConsentId ?? null },
+    req,
+  });
 
-  return Response.json({ status: "revoked", purpose });
+  return Response.json({ revoked: result.revoked, purpose });
 }
 ```
-
-## React Native — tela "Meus Dados"
-
-```tsx
-// screens/PrivacyScreen.tsx
-import { View, Button, Alert } from 'react-native';
-
-export function PrivacyScreen() {
-  const exportData = async () => {
-    const res = await fetch(`${API}/api/me/export`, { /* auth header */ });
-    // salva em arquivo local com expo-file-system + compartilhar
-  };
-
-  const requestErasure = () => {
-    Alert.alert(
-      "Excluir conta",
-      "Esta ação é irreversível para os dados não retidos por obrigação legal. Confira a política.",
-      [
-        { text: "Cancelar" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            const confirm = await promptText("Digite EXCLUIR MINHA CONTA para confirmar");
-            if (confirm === "EXCLUIR MINHA CONTA") {
-              await fetch(`${API}/api/me/erasure`, {
-                method: "POST",
-                body: JSON.stringify({ confirmation: confirm })
-              });
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  return (
-    <View>
-      <Button title="Exportar meus dados" onPress={exportData} />
-      <Button title="Gerenciar consentimentos" onPress={() => navigate("/privacy/consents")} />
-      <Button title="Corrigir dados" onPress={() => navigate("/privacy/profile")} />
-      <Button title="Excluir minha conta" onPress={requestErasure} color="red" />
-    </View>
-  );
-}
-```
-
-## Alerts de SLA
-
-Configure cron / scheduled job:
-- Dia 10: alerta amarelo no ticket
-- Dia 13: alerta vermelho + escalonamento ao Encarregado
-- Dia 15: bloqueio do tratamento se ainda não atendido + comunicação ao titular explicando o atraso (sempre desfavorável — evitar a todo custo)
