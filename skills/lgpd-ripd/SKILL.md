@@ -33,7 +33,7 @@ Para caracterizar alto risco segundo o parâmetro normativo vigente da ANPD, dev
 
 ### 2. Outras hipóteses legais de exigibilidade
 - Requisição expressa da ANPD a qualquer tempo (**Art. 38, caput**, e **Art. 10, § 3º** em tratamentos baseados em legítimo interesse);
-- Avaliações periódicas de impacto em plataformas sujeitas ao **ECA Digital** (Lei nº 15.211/2025).
+- Plataformas sujeitas ao **ECA Digital**: **avaliação de impacto à segurança e à saúde de crianças e adolescentes** com mapeamento de riscos (Lei nº 15.211/2025, Art. 16, parágrafo único) e **publicação de versão resumida** em linguagem clara (Decreto nº 12.880/2026, Art. 47, § 1º). Pode integrar o RIPD, mas cobre também riscos de design (uso compulsivo, contato com desconhecidos, recomendação), não só de dados pessoais. Ver `lgpd-eca-digital-minors`.
 
 ### 3. RIPD Preventivo (*boa prática recomendada*)
 - Quando houver **apenas um critério específico isolado** (ex.: coleta pontual de biometria de um grupo restrito sem larga escala e sem impacto significativo sobre acesso a direitos), o teste cumulativo da Res. 2/2022 **não se completa automaticamente**. Ainda assim, **recomenda-se elaborar RIPD simplificado/preventivo como boa prática de *privacy-by-design* (Art. 46, § 2º e Art. 50)** — registrando expressamente no cabeçalho do documento tratar-se de **avaliação preventiva de risco**, e não de obrigação legal automática.

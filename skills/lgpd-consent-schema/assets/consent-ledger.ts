@@ -3,6 +3,9 @@ import { isIP } from "node:net";
 
 export type ConsentEventType = "GRANTED" | "REVOKED" | "SUPERSEDED" | "EXPIRED";
 
+// Faixa etária do titular no momento do evento (LGPD Art. 14 + ECA Art. 2º). null = não aferida.
+export type SubjectAgeBand = "CHILD" | "ADOLESCENT" | "ADULT";
+
 export type ConsentChannel =
   | "WEB"
   | "MOBILE_RN"
@@ -28,7 +31,7 @@ export interface ConsentEventRecord {
   locale: string;
   channel: ConsentChannel;
   uiSnapshot: string | null;
-  isMinor: boolean;
+  subjectAgeBand: SubjectAgeBand | null;
   parentalConsent: boolean | null;
   guardianId: string | null;
   propagatedTo: unknown;
@@ -48,7 +51,7 @@ export interface ConsentEventCreateData {
   locale?: string;
   channel: ConsentChannel;
   uiSnapshot?: string | null;
-  isMinor?: boolean;
+  subjectAgeBand?: SubjectAgeBand | null;
   parentalConsent?: boolean | null;
   guardianId?: string | null;
   propagatedTo?: unknown;
@@ -125,15 +128,18 @@ export async function grantConsent(
     evidence: EvidenceContext;
     occurredAt?: Date;
     expiresAt?: Date | null;
-    isMinor?: boolean;
+    subjectAgeBand?: SubjectAgeBand | null;
     parentalConsent?: boolean | null;
     guardianId?: string | null;
     propagatedTo?: string[];
   },
 ): Promise<ConsentEventRecord> {
-  if (input.isMinor && input.parentalConsent !== true) {
+  // Art. 14, § 1º exige consentimento específico e em destaque de pai/mãe/responsável apenas para
+  // CRIANÇAS (< 12). Adolescentes consentem por si (Enunciado CD/ANPD nº 1/2023), observado o melhor
+  // interesse; a vinculação de conta do Art. 24 do ECA Digital é dever distinto (lgpd-eca-digital-minors).
+  if (input.subjectAgeBand === "CHILD" && (input.parentalConsent !== true || !input.guardianId)) {
     throw new Error(
-      "Consent-based processing for children requires verified parental/guardian consent (LGPD Art. 14, § 1º).",
+      "Consent-based processing for children requires specific parental/guardian consent with an identified guardian (LGPD Art. 14, § 1º).",
     );
   }
 
@@ -172,7 +178,7 @@ export async function grantConsent(
       locale,
       channel: input.evidence.channel,
       uiSnapshot,
-      isMinor: input.isMinor ?? false,
+      subjectAgeBand: input.subjectAgeBand ?? null,
       parentalConsent: input.parentalConsent ?? null,
       guardianId: input.guardianId ?? null,
       propagatedTo: input.propagatedTo ?? undefined,
@@ -236,7 +242,7 @@ export async function revokeConsent(
         locale,
         channel: input.evidence.channel,
         uiSnapshot,
-        isMinor: latest.isMinor,
+        subjectAgeBand: latest.subjectAgeBand,
         parentalConsent: latest.parentalConsent,
         guardianId: latest.guardianId,
         propagatedTo: input.propagatedTo ?? undefined,
@@ -297,7 +303,7 @@ export async function recordPolicySupersession(
         locale: latest.locale,
         channel: "API",
         uiSnapshot: null,
-        isMinor: latest.isMinor,
+        subjectAgeBand: latest.subjectAgeBand,
         parentalConsent: latest.parentalConsent,
         guardianId: latest.guardianId,
       },

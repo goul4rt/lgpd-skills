@@ -38,4 +38,4 @@
 - `lgpd-ripd` requer `lgpd-data-mapping` + `lgpd-legal-basis` (e idealmente `lgpd-ropa`)
 - `lgpd-dpa` e `lgpd-international-transfer` requerem o inventário e classificação de papéis de `lgpd-vendor-audit` / `lgpd-data-mapping`
 - `lgpd-privacy-policy` deve consolidar as saídas de `lgpd-data-mapping`, `lgpd-legal-basis`, `lgpd-dpo-encarregado`, `lgpd-retention-erasure` e `lgpd-international-transfer`
-- `lgpd-eca-digital-minors` impacta `lgpd-legal-basis`, `lgpd-consent-schema` e `lgpd-privacy-policy` quando há acesso provável ou direcionamento a menores
+- `lgpd-eca-digital-minors` impacta `lgpd-legal-basis`, `lgpd-consent-schema`, `lgpd-retention-erasure` (Art. 27, § 2º — retenção pelo Art. 15 do Marco Civil), `lgpd-ripd` (avaliação de impacto do Art. 16, parágrafo único / Decreto, Art. 47) e `lgpd-privacy-policy` quando há acesso provável ou direcionamento a menores. A **aplicabilidade** é triada já no mapeamento (F1/L2); os controles rodam antes do consent ledger

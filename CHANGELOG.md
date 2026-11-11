@@ -3,6 +3,37 @@
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [Unreleased]
+
+Revisão do ECA Digital conferida no texto da Lei nº 15.211/2025, no Decreto nº 12.880/2026 e no PDF do Guia ANPD v1.0 (out/2026).
+
+### Corrigido
+- **`consent-ledger.ts`**: o consentimento parental era exigido para qualquer menor de 18 (`isMinor`), o que rejeitava adolescentes. Agora `subjectAgeBand` (`CHILD` | `ADOLESCENT` | `ADULT`) aplica o Art. 14, § 1º só a crianças (< 12) e exige `guardianId` identificado, conforme o Enunciado CD/ANPD nº 1/2023.
+- **`dsar-sla.ts`**: a faixa `ADOLESCENT_12_TO_15` incluía 16 anos. Foi renomeada para `ADOLESCENT_12_TO_16`, e `ADOLESCENT_16_TO_17` para `ADOLESCENT_17`. A leitura "até 16 anos inclusive" do Art. 24 está documentada.
+- **`lgpd-eca-digital-minors`**:
+  - Presunção de acesso provável: agora com as **8 categorias** do Guia, incluindo IA generativa e e-commerce de itens proibidos a menores. Saiu "mensageria/comunidades", que o Guia exclui de rede social.
+  - Sinais de idade: descritos pelo texto do Decreto (Art. 25: gratuidade, sem data de nascimento, alternativa mais protetiva). Saíram os termos "dois níveis" e "sinais criptográficos", que não constam no Decreto.
+  - Escopo do Art. 24 marcado como controvertido: o caput é amplo, mas o artigo está no Capítulo "Das Redes Sociais".
+  - Relatório do Art. 31 deixa de ser atribuído só a lojas e sistemas operacionais.
+- **`consent-schema.prisma`**: CPF do `Guardian` passa a ser opcional (minimização), entra `guardianUserId` (Art. 24) e `os_age_signal` deixa de contar como prova de responsabilidade legal.
+
+### Adicionado
+- **`lgpd-eca-digital-minors`**:
+  - Teste cumulativo de acesso provável (Art. 1º, parágrafo único) e tratamento diferenciado do Art. 39, com a dispensa do § 1º.
+  - Dever de manter mecanismo próprio além do sinal (Art. 14, parágrafo único; Decreto, Art. 26, § 3º) e responsabilidade solidária da cadeia (Art. 15).
+  - Prevenção de uso compulsivo (Art. 8º; Decreto, Art. 9º) e vedação de dark patterns (Art. 18, § 2º; Decreto, Art. 10).
+  - Alternativas para loot boxes (Decreto, Art. 23, § 1º), interação limitada em jogos (Art. 21) e monetização de conteúdo com menores (Art. 23; Decreto, Art. 34).
+  - Canal de denúncia, retirada e contestação (Arts. 28–30), uso abusivo de denúncias (Arts. 32–33), comunicação à Polícia Federal (Decreto, Arts. 36–37), avaliação de impacto com resumo público (Art. 16, parágrafo único; Decreto, Art. 47), representante legal (Art. 40) e Art. 35, § 5º.
+  - Cronograma da ANPD, com fiscalização a partir de janeiro/2027.
+  - Template `.lgpd/eca-digital.md` reestruturado.
+- **`consent-schema.prisma`**: modelo `AgeAssurance`, que guarda o resultado da aferição de idade (faixa, origem, método) e nunca o documento bruto (Art. 13).
+- **`lgpd-retention-erasure`**: retenção do Art. 27, §§ 2º e 3º. **`lgpd-ripd`**: avaliação de impacto do ECA Digital.
+- **Testes**: consentimento de adolescente sem consentimento parental; 8 categorias, teste cumulativo e mecanismo próprio; ordem do ECA Digital no maestro.
+
+### Alterado
+- **`lgpd-audit`**: o Passo 0 pergunta se o produto é direcionado a menores ou acessível por eles. A aplicabilidade do ECA Digital é triada no mapeamento (F1/L2), e `lgpd-eca-digital-minors` passa a rodar **antes** de `lgpd-consent-schema` (F5/L7a).
+- **`normative-reference.md`**: seção do ECA Digital reescrita com os artigos da Lei e do Decreto, os Decretos nº 12.622/2025 e nº 12.881/2026 e três novas linhas na matriz de decisão.
+
 ## [1.3.0] - 2026-11-10
 
 ### Adicionado

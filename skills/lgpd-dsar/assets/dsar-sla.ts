@@ -143,8 +143,8 @@ export function planErasureDisposition(
 
 export type MinorAgeClassification =
   | "CHILD_UNDER_12"
-  | "ADOLESCENT_12_TO_15"
-  | "ADOLESCENT_16_TO_17"
+  | "ADOLESCENT_12_TO_16"
+  | "ADOLESCENT_17"
   | "ADULT_18_PLUS";
 
 /**
@@ -178,10 +178,11 @@ export function classifyMinorAgeRules(ageYears: number, legalBasisIsConsent: boo
 
   if (ageYears <= 16) {
     return {
-      band: "ADOLESCENT_12_TO_15",
+      band: "ADOLESCENT_12_TO_16",
       requiresBestInterestAssessment: true,
       requiresSpecificParentalConsentUnderArt14: false,
-      // Art. 24 da Lei 15.211/2025: usuários de até 16 anos
+      // Art. 24 da Lei 15.211/2025: "até 16 (dezesseis) anos". Leitura adotada: 16 anos INCLUSIVE
+      // (a mais protetiva, conforme o melhor interesse — Art. 3º). Documente se adotar outra leitura.
       requiresEcaDigitalGuardianLinkIfApplicable: true,
       adProfilingProhibited: true,
     };
@@ -189,7 +190,7 @@ export function classifyMinorAgeRules(ageYears: number, legalBasisIsConsent: boo
 
   if (ageYears < 18) {
     return {
-      band: "ADOLESCENT_16_TO_17",
+      band: "ADOLESCENT_17",
       requiresBestInterestAssessment: true,
       requiresSpecificParentalConsentUnderArt14: false,
       requiresEcaDigitalGuardianLinkIfApplicable: false,
