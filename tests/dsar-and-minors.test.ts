@@ -103,14 +103,17 @@ describe("DSAR SLAs (Standard vs. ATPP), Erasure Disposition & Minor Age Rules",
 
     // Adolescent 14y -> up to 16 requires ECA Digital Art. 24 guardian link where applicable
     const teen14 = classifyMinorAgeRules(14, false);
-    assert.equal(teen14.band, "ADOLESCENT_12_TO_15");
+    assert.equal(teen14.band, "ADOLESCENT_12_TO_16");
     assert.equal(teen14.requiresBestInterestAssessment, true);
     assert.equal(teen14.requiresEcaDigitalGuardianLinkIfApplicable, true);
     assert.equal(teen14.adProfilingProhibited, true);
 
+    // 16y is still "até 16 anos" (inclusive reading) -> guardian link applies
+    assert.equal(classifyMinorAgeRules(16, false).requiresEcaDigitalGuardianLinkIfApplicable, true);
+
     // Adolescent 17y -> best interest + ad profiling ban apply, Art. 24 up-to-16 link does not
     const teen17 = classifyMinorAgeRules(17, false);
-    assert.equal(teen17.band, "ADOLESCENT_16_TO_17");
+    assert.equal(teen17.band, "ADOLESCENT_17");
     assert.equal(teen17.requiresBestInterestAssessment, true);
     assert.equal(teen17.requiresEcaDigitalGuardianLinkIfApplicable, false);
     assert.equal(teen17.adProfilingProhibited, true);

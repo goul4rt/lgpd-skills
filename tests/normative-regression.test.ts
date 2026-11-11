@@ -64,6 +64,34 @@ describe("Normative accuracy & orchestration regression suite (Nov/2026 baseline
     assert.match(ecaSkill, /sinais de idade/i);
   });
 
+  it("encodes the ANPD Guide's 8 presumed categories, cumulative likely-access test and own-mechanism duty", () => {
+    const ecaSkill = readRepoFile("skills/lgpd-eca-digital-minors/SKILL.md");
+    for (const text of [ecaSkill, normativeRef]) {
+      assert.match(text, /intelig[eê]ncia artificial generativa|IA generativa/i);
+      assert.match(text, /com[eé]rcio eletr[oô]nico|e-commerce/i);
+      assert.match(text, /cumulativ/i);
+      assert.match(text, /Art\. 14, parágrafo único/);
+      assert.match(text, /Art\. 26, § 3º/);
+    }
+    // Private interpersonal messaging is NOT a presumed category (Guide, "Rede social").
+    const presumedList = ecaSkill.slice(ecaSkill.indexOf("### 1.1"), ecaSkill.indexOf("### 1.2"));
+    assert.doesNotMatch(presumedList, /^\d\.\s.*mensageria/im);
+    // Obligations previously missing.
+    for (const art of [/uso compulsivo/i, /Art\. 18, § 2º/, /Arts\. 28–30/, /Art\. 40/, /Art\. 47/, /Art\. 23, § 1º/]) {
+      assert.match(ecaSkill, art);
+    }
+  });
+
+  it("triages ECA Digital applicability at discovery and runs it before the consent ledger", () => {
+    const maestro = readRepoFile("skills/lgpd-audit/SKILL.md");
+    assert.match(maestro, /direcionado a menores de 18 anos ou pode ser acessado por eles/);
+    const pipelineA = maestro.match(/### Pipeline A[\s\S]*?```text([\s\S]*?)```/)![1]!;
+    assert.ok(
+      pipelineA.indexOf("lgpd-eca-digital-minors") < pipelineA.indexOf("lgpd-consent-schema"),
+      "ECA Digital must precede consent-schema (it defines Guardian/MinorLink and age assurance)",
+    );
+  });
+
   it("encodes Enunciado CD/ANPD nº 1/2023 and separates children (<12) from adolescents (12-17)", () => {
     const legalBasisSkill = readRepoFile("skills/lgpd-legal-basis/SKILL.md");
     assert.match(legalBasisSkill, /Enunciado CD\/ANPD nº 1\/2023/);

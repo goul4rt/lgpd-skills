@@ -49,7 +49,7 @@ export const auth = betterAuth({
   database: prismaAdapter(db, { provider: "postgresql" }),
   user: {
     additionalFields: {
-      ageBandVerified: { type: "string", required: false }, // ex.: "18+" | "16-17" | "12-15" | "<12"
+      ageBandVerified: { type: "string", required: false }, // ex.: "18+" | "17" | "12-16" | "<12" (Art. 24 ECA Digital: até 16 anos inclusive)
     },
   },
 });
@@ -102,6 +102,13 @@ const allowed = await hasActiveConsent(prisma, {
 });
 ```
 
+## Crianças e adolescentes (`subjectAgeBand`)
+
+- `subjectAgeBand: "CHILD"` (< 12): `grantConsent` exige `parentalConsent: true` **e** `guardianId` identificado (`Art. 14, § 1º`).
+- `subjectAgeBand: "ADOLESCENT"` (12 a < 18): o adolescente consente por si (**Enunciado CD/ANPD nº 1/2023**), com o melhor interesse prevalecendo. Não force consentimento parental aqui.
+- A vinculação da conta ao responsável (até 16 anos, `Art. 24` da Lei nº 15.211/2025) é outro dever, que não depende da base legal. Use `Guardian`/`MinorLink` e veja `lgpd-eca-digital-minors`.
+- Guarde o **resultado** da aferição de idade em `AgeAssurance` (faixa, origem, método), nunca documento ou biometria bruta (`Art. 13` da Lei nº 15.211/2025).
+
 ## Requisitos de UX (Art. 8º e Art. 9º)
 
 - **Zero checkboxes pré-marcados** — manifestação deve ser livre e inequívoca.
@@ -112,7 +119,7 @@ const allowed = await hasActiveConsent(prisma, {
 ## Status update
 
 ```markdown
-## F5 / L7a — Consent ledger ✓
+## F6 / L7b — Consent ledger ✓
 - Modelo `ConsentEvent` + `PolicyVersion` validado em `prisma/schema.prisma`
 - Trigger PostgreSQL append-only aplicada em migration
 - Helpers `grantConsent`, `revokeConsent` e `hasActiveConsent` testados

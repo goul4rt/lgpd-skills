@@ -73,7 +73,8 @@ flowchart TD
 >    - **B)** Legacy — sistema em produção precisando de diagnóstico e retrofit
 >    - **C)** Híbrido — base legada + novas features em desenvolvimento
 >    - **D)** Incidente — houve incidente de segurança com dados pessoais, preciso agir agora
-> 2. O controlador enquadra-se como **Agente de Tratamento de Pequeno Porte (ATPP)** na Resolução CD/ANPD nº 2/2022 (ME, EPP, startup até R$ 16M/ano ou entidade sem fins lucrativos, sem tratamento de alto risco)?"
+> 2. O controlador enquadra-se como **Agente de Tratamento de Pequeno Porte (ATPP)** na Resolução CD/ANPD nº 2/2022 (ME, EPP, startup até R$ 16M/ano ou entidade sem fins lucrativos, sem tratamento de alto risco)?
+> 3. O produto é **direcionado a menores de 18 anos ou pode ser acessado por eles**? (ex.: rede social, jogo, IA generativa, app em loja pública com cadastro aberto, e-commerce de itens proibidos a menores) — isso define se o **ECA Digital** (Lei nº 15.211/2025) se aplica, e não há dispensa de pequeno porte nele."
 
 ### Pipeline A — Greenfield
 
@@ -81,6 +82,8 @@ flowchart TD
 [F0]  Setup .lgpd/STATUS.md + enquadramento (ATPP vs. padrão)
   ↓
 [F1]  lgpd-data-mapping           → mapa preliminar (features, dados, cookies/SDKs, papéis)
+                                    + triagem de aplicabilidade do ECA Digital (categoria presumida
+                                    ou teste cumulativo do Art. 1º, parágrafo único)
   ↓
 [F2]  lgpd-legal-basis            → base legal por atividade + LIA + consolida data-map.md
   ↓
@@ -89,9 +92,10 @@ flowchart TD
 [F4]  lgpd-vendor-audit + lgpd-dpa + lgpd-international-transfer
                                   → papéis de terceiros, DPAs e adequação (Res. 32/2026) / SCCs
   ↓
-[F5]  lgpd-consent-schema         → ledger de eventos append-only (se houver consentimento)
+[F5]  lgpd-eca-digital-minors     → controles Lei 15.211/2025 + Dec. 12.880/2026 (se aplicável;
+                                    define aferição de idade e Guardian/MinorLink antes do ledger)
   ↓
-[F6]  lgpd-eca-digital-minors     → controles Lei 15.211/2025 + Dec. 12.880/2026 (se aplicável)
+[F6]  lgpd-consent-schema         → ledger de eventos append-only (se houver consentimento)
   ↓
 [F7]  lgpd-encryption-keys        → criptografia em trânsito, storage e campos + KMS
   ↓
@@ -120,6 +124,7 @@ flowchart TD
 [L1]  lgpd-legacy-retrofit        → discovery reverso + gap analysis priorizado   ⏸ CHECKPOINT
   ↓
 [L2]  lgpd-data-mapping           → inventário reverso (schemas, rotas, SDKs, cookies, papéis)
+                                    + triagem de aplicabilidade do ECA Digital
   ↓
 [L3]  lgpd-legal-basis            → base legal por atividade mapeada + LIAs + mapa consolidado
   ↓
@@ -131,7 +136,7 @@ flowchart TD
 [L6]  lgpd-retention-erasure + lgpd-anonymization
                                   → retenção excessiva + anonimização/pseudonimização em analytics
   ↓
-[L7]  lgpd-consent-schema + lgpd-eca-digital-minors (quando aplicáveis)
+[L7]  lgpd-eca-digital-minors + lgpd-consent-schema (quando aplicáveis, nesta ordem)
   ↓
 [L8]  lgpd-encryption-keys + lgpd-audit-logging
   ↓

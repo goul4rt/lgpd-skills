@@ -44,7 +44,7 @@ function createInMemoryConsentLedger(): {
         locale: data.locale ?? "pt-BR",
         channel: data.channel,
         uiSnapshot: data.uiSnapshot ?? null,
-        isMinor: data.isMinor ?? false,
+        subjectAgeBand: data.subjectAgeBand ?? null,
         parentalConsent: data.parentalConsent ?? null,
         guardianId: data.guardianId ?? null,
         propagatedTo: data.propagatedTo ?? null,
@@ -224,7 +224,7 @@ describe("Event-sourced Consent Ledger", () => {
     );
   });
 
-  it("requires parentalConsent=true when recording consent-based processing for children", async () => {
+  it("requires parental consent + identified guardian only for children (< 12), not adolescents", async () => {
     const { db } = createInMemoryConsentLedger();
 
     await assert.rejects(
@@ -233,8 +233,21 @@ describe("Event-sourced Consent Ledger", () => {
           subjectId: "child_1",
           purpose: "optional_feature",
           policyVersionId: "pol_v1",
-          isMinor: true,
+          subjectAgeBand: "CHILD",
           parentalConsent: false,
+          evidence: { channel: "MOBILE_RN" },
+        }),
+      /Art\. 14/,
+    );
+
+    await assert.rejects(
+      () =>
+        grantConsent(db, {
+          subjectId: "child_1",
+          purpose: "optional_feature",
+          policyVersionId: "pol_v1",
+          subjectAgeBand: "CHILD",
+          parentalConsent: true, // sem guardianId identificado
           evidence: { channel: "MOBILE_RN" },
         }),
       /Art\. 14/,
@@ -244,12 +257,24 @@ describe("Event-sourced Consent Ledger", () => {
       subjectId: "child_1",
       purpose: "optional_feature",
       policyVersionId: "pol_v1",
-      isMinor: true,
+      subjectAgeBand: "CHILD",
       parentalConsent: true,
       guardianId: "grd_123",
       evidence: { channel: "MOBILE_RN" },
     });
     assert.equal(validChildGrant.guardianId, "grd_123");
+    assert.equal(validChildGrant.subjectAgeBand, "CHILD");
+
+    // Enunciado CD/ANPD nº 1/2023: adolescente consente por si — Art. 14, § 1º não se aplica.
+    const teenGrant = await grantConsent(db, {
+      subjectId: "teen_1",
+      purpose: "optional_feature",
+      policyVersionId: "pol_v1",
+      subjectAgeBand: "ADOLESCENT",
+      evidence: { channel: "MOBILE_RN" },
+    });
+    assert.equal(teenGrant.eventType, "GRANTED");
+    assert.equal(teenGrant.parentalConsent, null);
     assert.equal(extractValidIp("not-an-ip"), null);
   });
 });
