@@ -27,6 +27,7 @@
     "termsOfServiceURL": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
     "brandColor": "#1B8A5A",
     "logo": "./assets/logo.png",
+    "composerIcon": "./assets/icon.png",
     "screenshots": []
   }
 }
