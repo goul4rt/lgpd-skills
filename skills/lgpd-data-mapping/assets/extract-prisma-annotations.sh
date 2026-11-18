@@ -16,16 +16,42 @@ echo
 echo "**Generated**: $(date -Iseconds)"
 echo
 
-# Match `/// @lgpd:...` lines preceding a model/field
+# Collect `/// @lgpd:...` annotations (standalone blocks and trailing field
+# comments), then flush them onto the next model/field line. A buffer avoids
+# leaking a preceding annotation onto an unrelated field.
 awk '
-  /^\/\/\/[[:space:]]*@lgpd:/ { annot[NR]=$0 }
+  function annot(s,   p, t) {
+    p = index(s, "///")
+    if (p == 0) return ""
+    t = substr(s, p)
+    if (t !~ /^\/\/\/[[:space:]]*@lgpd:/) return ""
+    return t
+  }
+  function flush(field,   j) {
+    if (field == "") return
+    for (j = 1; j <= np; j++) print "  - " field ": " pending[j]
+    if (inline != "") print "  - " field ": " inline
+    np = 0
+    inline = ""
+  }
+  /^[[:space:]]*\/\/\/[[:space:]]*@lgpd:/ {
+    line = $0
+    sub(/^[[:space:]]*/, "", line)
+    pending[++np] = line
+    next
+  }
   /^model[[:space:]]/ {
-    model=$2
+    model = $2
     print "\n## Model: " model
-    for (i=NR-5; i<NR; i++) if (i in annot) print "- " annot[i]
+    for (j = 1; j <= np; j++) print "- " pending[j]
+    np = 0
+    next
   }
   /^[[:space:]]+[a-zA-Z_]+[[:space:]]+[A-Z]/ {
-    field=$1
-    for (i=NR-2; i<NR; i++) if (i in annot) print "  - " field ": " annot[i]
+    inline = annot($0)
+    flush($1)
+    next
   }
+  NF == 0 { next }
+  { np = 0; inline = "" }
 ' "$SCHEMA"
