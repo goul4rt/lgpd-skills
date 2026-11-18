@@ -1,0 +1,29 @@
+name: Claude directory branch
+
+# Regenerates the `claude-directory` branch (tracked by Anthropic's plugin
+# directory) from main: plugin.json + skills + README/LICENSE/icons only.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: claude-directory
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and push branch
+        run: |
+          python3 scripts/build-claude-directory.py "$RUNNER_TEMP/out"
+          cd "$RUNNER_TEMP/out"
+          git init -q -b claude-directory
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "build: claude-directory from ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" claude-directory
