@@ -110,28 +110,28 @@
   {
     "name": "Awesome Agent Skills (heilcheng)",
     "repo": "heilcheng/awesome-agent-skills",
-    "category": "-",
+    "category": "Security",
     "type": "pull_request",
-    "status": "todo",
-    "pr_url": null,
+    "status": "submitted",
+    "pr_url": "https://github.com/heilcheng/awesome-agent-skills/pull/702",
     "notes": "6.4k★, ativo."
   },
   {
     "name": "Awesome Agent Skills (skillmatic-ai)",
     "repo": "skillmatic-ai/awesome-agent-skills",
-    "category": "-",
+    "category": "Popular Collections",
     "type": "pull_request",
-    "status": "todo",
-    "pr_url": null,
+    "status": "submitted",
+    "pr_url": "https://github.com/skillmatic-ai/awesome-agent-skills/pull/253",
     "notes": "~700★."
   },
   {
     "name": "Awesome Claude Code (jqueryscript)",
     "repo": "jqueryscript/awesome-claude-code",
-    "category": "-",
+    "category": "Agent Skills",
     "type": "pull_request",
-    "status": "todo",
-    "pr_url": null,
+    "status": "submitted",
+    "pr_url": "https://github.com/jqueryscript/awesome-claude-code/pull/991",
     "notes": "~550★, ativo."
   },
   {
