@@ -47,11 +47,14 @@ awk '
     np = 0
     next
   }
-  /^[[:space:]]+[a-zA-Z_]+[[:space:]]+[A-Z]/ {
+  /^[[:space:]]+[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]+[A-Z]/ {
     inline = annot($0)
     flush($1)
     next
   }
+  # Ordinary // or /// documentation comments must not discard a pending
+  # @lgpd annotation that belongs to the following model/field declaration.
+  /^[[:space:]]*\/\// { next }
   NF == 0 { next }
   { np = 0; inline = "" }
 ' "$SCHEMA"
