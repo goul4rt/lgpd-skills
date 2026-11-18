@@ -4,7 +4,7 @@
     "repo": "hashgraph-online/awesome-codex-plugins",
     "category": "Development & Workflow",
     "type": "pull_request",
-    "status": "submitted",
+    "status": "merged",
     "pr_url": "https://github.com/hashgraph-online/awesome-codex-plugins/pull/732",
     "notes": "Direct response to issue #2. Centralized HOL scanner runs automatically."
   },
@@ -60,15 +60,150 @@
     "type": "issue_template",
     "status": "blocked_by_upstream",
     "pr_url": null,
-    "notes": "Repository currently restricted to collaborators only. Can be submitted when restrictions are lifted."
+    "notes": "Lista relançada em nov/2026 com curadoria via 'recommendations'. Reavaliar quando reabrir submissões."
   },
   {
     "name": "Awesome Cursor Rules (PatrickJS)",
     "repo": "PatrickJS/awesome-cursorrules",
     "category": "Security",
     "type": "pull_request",
-    "status": "ready_to_submit",
-    "pr_url": null,
+    "status": "submitted",
+    "pr_url": "https://github.com/PatrickJS/awesome-cursorrules/pull/457",
     "notes": "Requires adding a .mdc rule to rules/ and listing in README.md."
+  },
+  {
+    "name": "Awesome GDPR",
+    "repo": "oppoverbakke/awesome-gdpr",
+    "category": "Tools",
+    "type": "pull_request",
+    "status": "submitted",
+    "pr_url": "https://github.com/oppoverbakke/awesome-gdpr/pull/43",
+    "notes": "Lista de privacidade/GDPR."
+  },
+  {
+    "name": "skills.sh (Vercel)",
+    "repo": "https://skills.sh/goul4rt/lgpd-skills",
+    "category": "-",
+    "type": "install_tracking",
+    "status": "listed",
+    "pr_url": null,
+    "notes": "Listagem automática via `npx skills add goul4rt/lgpd-skills`. Divulgar esse comando no README."
+  },
+  {
+    "name": "Gemini CLI Extensions Gallery",
+    "repo": "https://geminicli.com/extensions/",
+    "category": "-",
+    "type": "auto_crawl",
+    "status": "listed",
+    "pr_url": null,
+    "notes": "Indexado via topic gemini-cli-extension + gemini-extension.json na raiz."
+  },
+  {
+    "name": "Anthropic Plugin Directory",
+    "repo": "https://claude.ai/directory/manage",
+    "category": "Privacy / Compliance",
+    "type": "portal",
+    "status": "manual",
+    "pr_url": null,
+    "notes": "Maior alcance (claude.ai, Cowork e Claude Code). Submeter pelo portal com plano pago. `claude plugin validate --strict .` passa."
+  },
+  {
+    "name": "Awesome Agent Skills (heilcheng)",
+    "repo": "heilcheng/awesome-agent-skills",
+    "category": "-",
+    "type": "pull_request",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "6.4k★, ativo."
+  },
+  {
+    "name": "Awesome Agent Skills (skillmatic-ai)",
+    "repo": "skillmatic-ai/awesome-agent-skills",
+    "category": "-",
+    "type": "pull_request",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "~700★."
+  },
+  {
+    "name": "Awesome Claude Code (jqueryscript)",
+    "repo": "jqueryscript/awesome-claude-code",
+    "category": "-",
+    "type": "pull_request",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "~550★, ativo."
+  },
+  {
+    "name": "Awesome LGPD",
+    "repo": "AlanTaranti/awesome-lgpd",
+    "category": "-",
+    "type": "pull_request",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "Nicho exato, mas parado desde 2022 — baixa prioridade."
+  },
+  {
+    "name": "Awesome Claude Skills (ComposioHQ)",
+    "repo": "ComposioHQ/awesome-claude-skills",
+    "category": "-",
+    "type": "pull_request",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "80k★. Exige a skill copiada numa pasta do repo (SKILL.md); avaliar se vale enviar só o lgpd-audit."
+  },
+  {
+    "name": "Smithery",
+    "repo": "https://smithery.ai",
+    "category": "-",
+    "type": "form",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "Submeter a URL do repo no site."
+  },
+  {
+    "name": "LobeHub Skills",
+    "repo": "https://lobehub.com/skills",
+    "category": "-",
+    "type": "form",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "Submeter a URL do repo."
+  },
+  {
+    "name": "Skills Directory",
+    "repo": "https://www.skillsdirectory.com",
+    "category": "-",
+    "type": "form",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "Formulário grátis, com scan de segurança."
+  },
+  {
+    "name": "MCP Directory (skills)",
+    "repo": "https://mcp.directory/submit-skill",
+    "category": "-",
+    "type": "form",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "Formulário grátis."
+  },
+  {
+    "name": "TabNews",
+    "repo": "https://www.tabnews.com.br",
+    "category": "-",
+    "type": "post",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "Post em PT-BR: problema → demo do lgpd-audit → instalação."
+  },
+  {
+    "name": "LinkedIn",
+    "repo": "https://www.linkedin.com",
+    "category": "-",
+    "type": "post",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "Público de DPO/jurídico: foco no ECA Digital (Decreto 12.880/2026)."
   }
 ]

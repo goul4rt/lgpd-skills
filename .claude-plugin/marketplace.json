@@ -4,6 +4,9 @@
     "name": "goul4rt",
     "url": "https://github.com/goul4rt"
   },
+  "metadata": {
+    "description": "LGPD Privacy Engineering Toolkit — Agent Skills para LGPD, normas da ANPD e ECA Digital."
+  },
   "plugins": [
     {
       "name": "lgpd-skills",
@@ -16,7 +19,15 @@
       },
       "homepage": "https://github.com/goul4rt/lgpd-skills",
       "license": "MIT",
-      "keywords": ["lgpd", "privacy-engineering", "privacy", "anpd", "data-protection", "eca-digital", "security"]
+      "keywords": [
+        "lgpd",
+        "privacy-engineering",
+        "privacy",
+        "anpd",
+        "data-protection",
+        "eca-digital",
+        "security"
+      ]
     }
   ]
 }
