@@ -57,10 +57,10 @@
     "name": "Awesome Claude Code (hesreallyhim)",
     "repo": "hesreallyhim/awesome-claude-code",
     "category": "Security / Skills",
-    "type": "issue_template",
-    "status": "blocked_by_upstream",
+    "type": "issue_form_web_ui",
+    "status": "manual",
     "pr_url": null,
-    "notes": "Lista relançada em nov/2026 com curadoria via 'recommendations'. Reavaliar quando reabrir submissões."
+    "notes": "Reaberto (nov/2026). Só aceita issue criada por humano pela Web UI (gh CLI e agentes proibidos). Texto pronto no histórico da sessão de 17/11."
   },
   {
     "name": "Awesome Cursor Rules (PatrickJS)",
@@ -105,7 +105,7 @@
     "type": "portal",
     "status": "manual",
     "pr_url": null,
-    "notes": "Maior alcance (claude.ai, Cowork e Claude Code). Submeter pelo portal com plano pago. `claude plugin validate --strict .` passa."
+    "notes": "Submetido em 17/11/2026 (branch claude-directory). Acompanhar em claude.ai/directory/manage."
   },
   {
     "name": "Awesome Agent Skills (heilcheng)",
@@ -205,5 +205,14 @@
     "status": "todo",
     "pr_url": null,
     "notes": "Público de DPO/jurídico: foco no ECA Digital (Decreto 12.880/2026)."
+  },
+  {
+    "name": "ClawHub",
+    "repo": "https://clawhub.ai",
+    "category": "-",
+    "type": "cli_publish",
+    "status": "todo",
+    "pr_url": null,
+    "notes": "Maior tráfego entre diretórios de skills (~3.8M visitas/mês). Publicar via CLI `clawhub` com conta própria."
   }
 ]
