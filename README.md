@@ -1,5 +1,7 @@
 # lgpd-skills — LGPD Privacy Engineering Toolkit
 
+> [English](./README.en.md)
+
 > **AI-assisted privacy auditing, implementation and governance for software projects.**
 > Toolkit modular e orquestrado de **Agent Skills** — compatível com **Claude Code, Codex, Gemini CLI, Cursor e OpenCode** — para diagnóstico técnico de código, implementação de controles de engenharia de privacidade e governança de artefatos sob a **Lei nº 13.709/2018 (LGPD)**, normas da **ANPD (até nov/2026)** e **Lei nº 15.211/2025 + Decreto nº 12.880/2026 (ECA Digital)**.
 
