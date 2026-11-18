@@ -175,9 +175,9 @@
     "repo": "https://www.skillsdirectory.com",
     "category": "-",
     "type": "form",
-    "status": "manual",
+    "status": "submitted",
     "pr_url": null,
-    "notes": "Exige login (GitHub/Google/e-mail) em app.skillsdirectory.com/submit."
+    "notes": "Enviado pelo autor em 17/11/2026."
   },
   {
     "name": "MCP Directory (skills)",
