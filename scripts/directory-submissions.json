@@ -163,30 +163,30 @@
   },
   {
     "name": "LobeHub Skills",
-    "repo": "https://lobehub.com/skills",
+    "repo": "https://lobehub.com/skills/goul4rt-lgpd-skills-lgpd-audit",
     "category": "-",
     "type": "form",
-    "status": "todo",
+    "status": "listed",
     "pr_url": null,
-    "notes": "Submeter a URL do repo."
+    "notes": "Indexado automaticamente."
   },
   {
     "name": "Skills Directory",
     "repo": "https://www.skillsdirectory.com",
     "category": "-",
     "type": "form",
-    "status": "todo",
+    "status": "manual",
     "pr_url": null,
-    "notes": "Formulário grátis, com scan de segurança."
+    "notes": "Exige login (GitHub/Google/e-mail) em app.skillsdirectory.com/submit."
   },
   {
     "name": "MCP Directory (skills)",
     "repo": "https://mcp.directory/submit-skill",
     "category": "-",
     "type": "form",
-    "status": "todo",
+    "status": "submitted",
     "pr_url": null,
-    "notes": "Formulário grátis."
+    "notes": "Enviado em 17/11/2026 via formulário (sem e-mail). Revisão em até 24h."
   },
   {
     "name": "TabNews",
