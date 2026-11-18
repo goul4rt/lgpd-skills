@@ -58,9 +58,9 @@
     "repo": "hesreallyhim/awesome-claude-code",
     "category": "Security / Skills",
     "type": "issue_form_web_ui",
-    "status": "manual",
+    "status": "blocked_by_upstream",
     "pr_url": null,
-    "notes": "Reaberto (nov/2026). Só aceita issue criada por humano pela Web UI (gh CLI e agentes proibidos). Texto pronto no histórico da sessão de 17/11."
+    "notes": "Issues limitadas a colaboradores (confirmado em 17/11/2026). Só aceita issue humana via Web UI; não usar Discussions como atalho (CONTRIBUTING proíbe). Tentar de novo quando reabrir."
   },
   {
     "name": "Awesome Cursor Rules (PatrickJS)",
