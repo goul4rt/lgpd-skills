@@ -9,7 +9,7 @@
 [![LGPD](https://img.shields.io/badge/LGPD-Lei%2013.709%2F2018-blue)](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm)
 [![ECA Digital](https://img.shields.io/badge/ECA%20Digital-Lei%2015.211%2F2025-blue)](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15211.htm)
 
-<p align="center"><a href="./assets/lgpd-skills-demo.mp4"><img src="./assets/lgpd-skills-demo.gif" alt="Demo: /lgpd-audit acha CPF no log e sem criptografia num app de exemplo, roda as etapas com checkpoint de revisão jurídica, gera os artefatos em .lgpd/ e corrige o código" width="100%"></a></p>
+<p align="center"><a href="./assets/lgpd-skills-demo.mp4"><img src="./assets/lgpd-skills-demo.gif" alt="Demo: /lgpd-audit acha CPF no log e sem criptografia num app de exemplo, roda as etapas com checkpoint de revisão jurídica, gera os artefatos em .lgpd/ e corrige o código" width="720"></a></p>
 
 ---
 
