@@ -29,6 +29,7 @@ Revisão do ECA Digital conferida no texto da Lei nº 15.211/2025, no Decreto n�
 - **`consent-schema.prisma`**: modelo `AgeAssurance`, que guarda o resultado da aferição de idade (faixa, origem, método) e nunca o documento bruto (Art. 13).
 - **`lgpd-retention-erasure`**: retenção do Art. 27, §§ 2º e 3º. **`lgpd-ripd`**: avaliação de impacto do ECA Digital.
 - **Testes**: consentimento de adolescente sem consentimento parental; 8 categorias, teste cumulativo e mecanismo próprio; ordem do ECA Digital no maestro.
+- **`examples/app-com-vazamento`**: app de exemplo vulnerável de propósito (CPF e data de nascimento sem proteção no schema, CPF e e-mail no log do login e no SDK de analytics) para testar o `/lgpd-audit`. Fica fora do pacote do plugin.
 
 ### Alterado
 - **`lgpd-audit`**: o Passo 0 pergunta se o produto é direcionado a menores ou acessível por eles. A aplicabilidade do ECA Digital é triada no mapeamento (F1/L2), e `lgpd-eca-digital-minors` passa a rodar **antes** de `lgpd-consent-schema` (F5/L7a).
