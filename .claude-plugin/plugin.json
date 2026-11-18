@@ -1,5 +1,6 @@
 {
   "name": "lgpd-skills",
+  "displayName": "LGPD Skills",
   "description": "LGPD Privacy Engineering Toolkit — auditoria técnica de código assistida por IA, implementação de controles e governança para LGPD (Lei 13.709/2018), normas da ANPD (até nov/2026, incluindo Res. 32/2026 UE/EEE) e ECA Digital (Lei 15.211/2025 + Dec. 12.880/2026). Inclui 1 maestro (lgpd-audit) e 18 sub-skills especializadas.",
   "version": "1.3.0",
   "author": {
@@ -8,6 +9,18 @@
   },
   "homepage": "https://github.com/goul4rt/lgpd-skills",
   "repository": "https://github.com/goul4rt/lgpd-skills",
+  "documentationUrl": "https://github.com/goul4rt/lgpd-skills#readme",
+  "supportUrl": "https://github.com/goul4rt/lgpd-skills/issues",
+  "privacyPolicyUrl": "https://github.com/goul4rt/lgpd-skills/blob/main/PRIVACY.md",
+  "termsOfServiceUrl": "https://github.com/goul4rt/lgpd-skills/blob/main/LICENSE",
   "license": "MIT",
-  "keywords": ["lgpd", "privacy-engineering", "privacy", "anpd", "data-protection", "eca-digital", "security"]
+  "keywords": [
+    "lgpd",
+    "privacy-engineering",
+    "privacy",
+    "anpd",
+    "data-protection",
+    "eca-digital",
+    "security"
+  ]
 }
