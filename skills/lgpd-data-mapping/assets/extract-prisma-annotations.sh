@@ -19,13 +19,31 @@ echo
 # Collect `/// @lgpd:...` annotations (standalone blocks and trailing field
 # comments), then flush them onto the next model/field line. A buffer avoids
 # leaking a preceding annotation onto an unrelated field.
+# The trailing-comment locator ignores `///` sequences inside quoted strings
+# (e.g. @default("file:///private")), including escaped quotes.
 awk '
-  function annot(s,   p, t) {
-    p = index(s, "///")
-    if (p == 0) return ""
-    t = substr(s, p)
-    if (t !~ /^\/\/\/[[:space:]]*@lgpd:/) return ""
-    return t
+  function annot(s,   i, c, n, inq, esc, dq, bs, t) {
+    dq = sprintf("%c", 34)
+    bs = sprintf("%c", 92)
+    n = length(s)
+    inq = 0
+    esc = 0
+    for (i = 1; i <= n; i++) {
+      c = substr(s, i, 1)
+      if (inq) {
+        if (esc) { esc = 0; continue }
+        if (c == bs) { esc = 1; continue }
+        if (c == dq) { inq = 0 }
+        continue
+      }
+      if (c == dq) { inq = 1; continue }
+      if (c == "/" && substr(s, i, 3) == "///") {
+        t = substr(s, i)
+        if (substr(t, 4) ~ /^[[:space:]]*@lgpd:/) return t
+        return ""
+      }
+    }
+    return ""
   }
   function flush(field,   j) {
     if (field == "") return
@@ -34,27 +52,29 @@ awk '
     np = 0
     inline = ""
   }
-  /^[[:space:]]*\/\/\/[[:space:]]*@lgpd:/ {
+  {
     line = $0
     sub(/^[[:space:]]*/, "", line)
-    pending[++np] = line
-    next
-  }
-  /^model[[:space:]]/ {
-    model = $2
-    print "\n## Model: " model
-    for (j = 1; j <= np; j++) print "- " pending[j]
+    if (substr(line, 1, 3) == "///" && substr(line, 4) ~ /^[[:space:]]*@lgpd:/) {
+      pending[++np] = line
+      next
+    }
+    if (line ~ /^model[[:space:]]/) {
+      model = $2
+      print ""
+      print "## Model: " model
+      for (j = 1; j <= np; j++) print "- " pending[j]
+      np = 0
+      next
+    }
+    if ($0 ~ /^[[:space:]]+[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]+[A-Z]/) {
+      inline = annot($0)
+      flush($1)
+      next
+    }
+    if (substr(line, 1, 2) == "//") { next }
+    if (line == "") { next }
     np = 0
-    next
+    inline = ""
   }
-  /^[[:space:]]+[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]+[A-Z]/ {
-    inline = annot($0)
-    flush($1)
-    next
-  }
-  # Ordinary // or /// documentation comments must not discard a pending
-  # @lgpd annotation that belongs to the following model/field declaration.
-  /^[[:space:]]*\/\// { next }
-  NF == 0 { next }
-  { np = 0; inline = "" }
 ' "$SCHEMA"

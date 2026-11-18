@@ -25,6 +25,7 @@ model Customer {
   cpf   String
   email String /// @lgpd:pii=direct
   address2 String /// @lgpd: category=location
+  storage2 String @default("file:///private") /// @lgpd: category=system
   age   Int
 }
 
@@ -64,7 +65,12 @@ describe("extract-prisma-annotations.sh field-level extraction", () => {
     assert.match(out, /- address2: \/\/\/ @lgpd: category=location/);
   });
 
+  it("ignores a /// inside a quoted default value", () => {
+    assert.match(out, /- storage2: \/\/\/ @lgpd: category=system/);
+  });
+
   it("does not leak annotations into a later model without annotations", () => {
+    assert.match(out, /^## Model: Order$/m);
     const order = out.slice(out.indexOf("## Model: Order"));
     assert.doesNotMatch(order, /@lgpd:/);
   });
