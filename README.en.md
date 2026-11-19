@@ -97,9 +97,11 @@ Add to `opencode.json` (details in [`.opencode/INSTALL.md`](./.opencode/INSTALL.
 
 ### Manual installation
 ```bash
-git clone https://github.com/goul4rt/lgpd-skills.git /tmp/lgpd-skills
-cp -r /tmp/lgpd-skills/skills/lgpd-* ~/.claude/skills/
-rm -rf /tmp/lgpd-skills
+tmp=$(mktemp -d)
+git clone https://github.com/goul4rt/lgpd-skills.git "$tmp"
+mkdir -p ~/.claude/skills
+cp -r "$tmp"/skills/lgpd-* ~/.claude/skills/
+rm -rf "$tmp"
 ```
 
 ---
