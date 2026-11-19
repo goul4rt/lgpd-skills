@@ -193,4 +193,25 @@ describe("Skills structure, frontmatters, links, and 5-agent manifests", () => {
     await plugin.config(cfg); // idempotency check
     assert.deepEqual(cfg.skills?.paths, [SKILLS_DIR]);
   });
+
+  it("keeps the intentionally leaky example app in examples/ and out of the plugin package", () => {
+    const exampleDir = path.join(ROOT, "examples/app-com-vazamento");
+    const readExample = (relPath: string): string => {
+      const fullPath = path.join(exampleDir, relPath);
+      assert.ok(existsSync(fullPath), `Missing examples/app-com-vazamento/${relPath}`);
+      return readFileSync(fullPath, "utf8");
+    };
+
+    const schema = readExample("prisma/schema.prisma");
+    assert.match(schema, /model User \{[^}]*\bcpf\b[^}]*\bbirthDate\b/);
+    assert.doesNotMatch(schema, /@lgpd:/);
+    assert.match(readExample("src/auth/login.ts"), /logger\.info\([^)]*\bcpf\b[^)]*\bemail\b/);
+    assert.match(readExample("src/lib/analytics.ts"), /analytics\.\w+\([^)]*\bcpf\b/);
+    assert.match(readExample("README.md"), /\/lgpd-audit/);
+
+    const buildScript = readFileSync(path.join(ROOT, "scripts/build-claude-directory.py"), "utf8");
+    const keepLine = buildScript.match(/^KEEP = \[.*\]$/m);
+    assert.ok(keepLine, "KEEP list not found in scripts/build-claude-directory.py");
+    assert.doesNotMatch(keepLine[0], /examples/);
+  });
 });
