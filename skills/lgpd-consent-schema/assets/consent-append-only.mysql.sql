@@ -24,11 +24,14 @@ SIGNAL SQLSTATE '45000'
 
 -- Hardening recomendado para a role usada pela aplicação web (ajuste o nome da role).
 -- O REVOKE abaixo é necessário, mas insuficiente sozinho se existir DROP em escopo maior.
+-- Em escopo de banco/global, revogue só DROP: um REVOKE ALL no database tiraria
+-- SELECT/INSERT de outras tabelas (ex.: PolicyVersion) que a aplicação ainda precisa.
+-- UPDATE/DELETE em ConsentEvent já são barrados pelos triggers; revogue-os na tabela.
 --
--- 1) Remova DROP (e UPDATE/DELETE) em global/database/roles herdadas, por exemplo:
--- REVOKE ALL ON `seu_banco`.* FROM 'app_runtime'@'%';
+-- 1) Remova DROP em global/database/roles herdadas, por exemplo:
+-- REVOKE DROP ON `seu_banco`.* FROM 'app_runtime'@'%';
 -- REVOKE DROP ON *.* FROM 'app_runtime'@'%';
 --
--- 2) Conceda só o mínimo na tabela do ledger:
+-- 2) Na tabela do ledger, preserve SELECT/INSERT e tire UPDATE/DELETE/DROP:
 -- GRANT SELECT, INSERT ON `ConsentEvent` TO 'app_runtime'@'%';
 -- REVOKE UPDATE, DELETE, DROP ON `ConsentEvent` FROM 'app_runtime'@'%';
