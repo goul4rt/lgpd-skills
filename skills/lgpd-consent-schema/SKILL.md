@@ -27,7 +27,7 @@ Cada evento possui:
 
 - **Schema Prisma**: [`assets/consent-schema.prisma`](assets/consent-schema.prisma)
 - **Trigger PostgreSQL append-only real**: [`assets/consent-append-only.sql`](assets/consent-append-only.sql) — bloqueia `UPDATE`, `DELETE` e `TRUNCATE` diretamente no banco (além de `REVOKE UPDATE, DELETE` na role da aplicação).
-- **Trigger MySQL/MariaDB append-only**: [`assets/consent-append-only.mysql.sql`](assets/consent-append-only.mysql.sql) — bloqueia `UPDATE` e `DELETE` via `SIGNAL SQLSTATE '45000'`; MySQL não tem trigger de `TRUNCATE` — cubra com `REVOKE UPDATE, DELETE, DROP` na role da aplicação.
+- **Trigger MySQL/MariaDB append-only**: [`assets/consent-append-only.mysql.sql`](assets/consent-append-only.mysql.sql) — bloqueia `UPDATE` e `DELETE` via `SIGNAL SQLSTATE '45000'`; MySQL não tem trigger de `TRUNCATE` — remova `DROP`/`UPDATE`/`DELETE` efetivos da role (todos os escopos: global, database e tabela), mantendo só `SELECT`/`INSERT`.
 - **Módulo TypeScript tipado**: [`assets/consent-ledger.ts`](assets/consent-ledger.ts) (`grantConsent`, `revokeConsent`, `recordPolicySupersession`, `hasActiveConsent`).
 
 ## Proteção append-only efetiva no banco
@@ -43,6 +43,8 @@ FOR EACH ROW EXECUTE FUNCTION prevent_consent_event_mutation();
 ```
 
 **MySQL / MariaDB** ([`assets/consent-append-only.mysql.sql`](assets/consent-append-only.mysql.sql)):
+
+> **Adaptação de schema (antes da migration):** o asset [`consent-schema.prisma`](assets/consent-schema.prisma) usa `ipAddress String? @db.Inet`, tipo nativo só do PostgreSQL. No MySQL, na **sua cópia** do schema, troque para uma coluna string compatível (ex.: `@db.VarChar(45)`). O asset shipado no repositório permanece inalterado.
 
 ```sql
 CREATE TRIGGER trg_consent_event_no_update
