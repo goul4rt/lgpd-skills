@@ -1,6 +1,6 @@
 ---
 name: lgpd-consent-schema
-description: Design an event-sourced, database-enforced append-only consent ledger satisfying LGPD Art. 8 (free, informed, unambiguous consent, burden of proof, easy revocation, policy version supersession), Art. 14, and Art. 18, IX. Use when user asks for "consent schema", "consent ledger", "schema de consentimento", "Prisma consentimento", or integrates consent capture/revocation with Better Auth, NextAuth, or Clerk. Outputs Prisma schema, PostgreSQL append-only triggers, and TypeScript helpers.
+description: Design an event-sourced, database-enforced append-only consent ledger satisfying LGPD Art. 8 (free, informed, unambiguous consent, burden of proof, easy revocation, policy version supersession), Art. 14, and Art. 18, IX. Use when user asks for "consent schema", "consent ledger", "schema de consentimento", "Prisma consentimento", or integrates consent capture/revocation with Better Auth, NextAuth, or Clerk. Outputs Prisma schema, PostgreSQL/MySQL append-only triggers, and TypeScript helpers.
 ---
 
 # Consent Ledger Orientado a Eventos (Prisma + PostgreSQL)
@@ -27,16 +27,29 @@ Cada evento possui:
 
 - **Schema Prisma**: [`assets/consent-schema.prisma`](assets/consent-schema.prisma)
 - **Trigger PostgreSQL append-only real**: [`assets/consent-append-only.sql`](assets/consent-append-only.sql) — bloqueia `UPDATE`, `DELETE` e `TRUNCATE` diretamente no banco (além de `REVOKE UPDATE, DELETE` na role da aplicação).
+- **Trigger MySQL/MariaDB append-only**: [`assets/consent-append-only.mysql.sql`](assets/consent-append-only.mysql.sql) — bloqueia `UPDATE` e `DELETE` via `SIGNAL SQLSTATE '45000'`; MySQL não tem trigger de `TRUNCATE` — cubra com `REVOKE UPDATE, DELETE, DROP` na role da aplicação.
 - **Módulo TypeScript tipado**: [`assets/consent-ledger.ts`](assets/consent-ledger.ts) (`grantConsent`, `revokeConsent`, `recordPolicySupersession`, `hasActiveConsent`).
 
 ## Proteção append-only efetiva no banco
 
-Comentário em código não garante imutabilidade. Inclua na migration do Prisma o trigger de [`assets/consent-append-only.sql`](assets/consent-append-only.sql):
+Comentário em código não garante imutabilidade. Inclua na migration do Prisma o trigger adequado ao dialeto:
+
+**PostgreSQL** ([`assets/consent-append-only.sql`](assets/consent-append-only.sql)):
 
 ```sql
 CREATE TRIGGER trg_consent_event_no_update_delete
 BEFORE UPDATE OR DELETE ON "ConsentEvent"
 FOR EACH ROW EXECUTE FUNCTION prevent_consent_event_mutation();
+```
+
+**MySQL / MariaDB** ([`assets/consent-append-only.mysql.sql`](assets/consent-append-only.mysql.sql)):
+
+```sql
+CREATE TRIGGER trg_consent_event_no_update
+BEFORE UPDATE ON `ConsentEvent`
+FOR EACH ROW
+SIGNAL SQLSTATE '45000'
+  SET MESSAGE_TEXT = 'Append-only violation: UPDATE is prohibited on table ConsentEvent';
 ```
 
 ## Integração com Better Auth (sem coleta excessiva)
@@ -121,7 +134,7 @@ const allowed = await hasActiveConsent(prisma, {
 ```markdown
 ## F6 / L7b — Consent ledger ✓
 - Modelo `ConsentEvent` + `PolicyVersion` validado em `prisma/schema.prisma`
-- Trigger PostgreSQL append-only aplicada em migration
+- Trigger append-only aplicada em migration (PostgreSQL e/ou MySQL)
 - Helpers `grantConsent`, `revokeConsent` e `hasActiveConsent` testados
 - Propagação de revogação configurada para operadores: {lista}
 ```

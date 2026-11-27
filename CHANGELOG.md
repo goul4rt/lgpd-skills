@@ -18,6 +18,7 @@ Revisão do ECA Digital conferida no texto da Lei nº 15.211/2025, no Decreto n�
 - **`consent-schema.prisma`**: CPF do `Guardian` passa a ser opcional (minimização), entra `guardianUserId` (Art. 24) e `os_age_signal` deixa de contar como prova de responsabilidade legal.
 
 ### Adicionado
+- **`lgpd-consent-schema`**: trigger append-only para MySQL/MariaDB (`consent-append-only.mysql.sql`) com `SIGNAL SQLSTATE '45000'` em `UPDATE`/`DELETE`, documentação da limitação de `TRUNCATE` e `REVOKE UPDATE, DELETE, DROP` na role da aplicação.
 - **`lgpd-eca-digital-minors`**:
   - Teste cumulativo de acesso provável (Art. 1º, parágrafo único) e tratamento diferenciado do Art. 39, com a dispensa do § 1º.
   - Dever de manter mecanismo próprio além do sinal (Art. 14, parágrafo único; Decreto, Art. 26, § 3º) e responsabilidade solidária da cadeia (Art. 15).
